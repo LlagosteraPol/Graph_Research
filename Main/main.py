@@ -23,6 +23,33 @@ class Switcher(object):
         g_list = GraphTools.gen_all_hamiltonian(n_nodes, chords)
         GraphTools.gen_g6_file(g_list, "Hamilton_n" + str(n_nodes)+"_ch" + str(chords))
 
+    def option_gen_fair_cake(self):
+        print("This option will give all the fair cake constructions of the given 'n' nodes graph")
+        n_nodes = int(Utilities.input_number("Input number of nodes:\n"))
+        analyze = Utilities.ask_yes_no("Analyze the created graphs?")
+
+        path = os.getcwd() + "/Data"
+
+        if not analyze:
+            if os.path.isfile(path + "/Results/" + str(n_nodes) + "n_FairCake" + "_results.txt"):
+                os.remove(path + "/Results/" + str(n_nodes) + "n_FairCake" + "_results.txt")
+            print("Graph; Hamiltonian cycle; Graph Edges",
+                  file=open(path + "/Results/" + str(n_nodes) + "n_FairCake" + "_results.txt", "a"))
+        g_list = list()
+        for i in range(1, int(n_nodes/2) + 1):
+            print("Constructing Fair Cake: " + str(n_nodes) + "n, " + str(i + n_nodes) + "e")
+            fc = GraphRel.fair_cake_algorithm(n_nodes, i)
+            g_list.append(fc)
+
+            if not analyze:
+                print("\n" + "Graph_n" + str(len(fc.nodes)) + "_e" + str(len(fc.edges)) + ";" +
+                      str(GraphTools.hamilton_cycle(fc)) + ";" +
+                      str(sorted(fc.edges())),
+                      file=open(path + "/Results/" + str(n_nodes) + "n_FairCake" + "_results.txt", "a"))
+
+        if analyze:
+            GraphTools.analyze_graphs(g_list, path, str(n_nodes) + "n_FairCake", False)
+
     def option_analyze_a_g6_file(self):
         print("This option will analyze a graph in .g6 format within the range of 'n' nodes (minimum-maximum), "
               "and 'e' edges")
@@ -42,47 +69,6 @@ class Switcher(object):
         cros = Utilities.ask_yes_no("Check if the polynomials cross in some point?")
 
         GraphTools.analyze_g6_files(n_min, n_max, complete, cros)
-
-    def option_gen_optimal_hamiltonian(self):
-        #TODO: It's not true
-        p = sympy.symbols("p")
-
-        print("This option prints a hamiltonian graph with optimal Reliability Polynomial with maximum edges = "
-              , "nodes + nodes / 2")
-        nodes = int(Utilities.input_number("Input number of nodes:\n"))
-        edges = int(Utilities.input_number("Input number of edges:\n"))
-        while edges > int(nodes + nodes / 2) or edges < nodes:
-            print("The number of edges must be between ", nodes, " and ", int(nodes + nodes / 2))
-            edges = int(Utilities.input_number("Input number of edges:\n"))
-
-        optimal = GraphRel.fair_cake_algorithm(nodes, edges - nodes)
-        AdjMaBox.plot(optimal)
-        #pol = GraphRel.relpoly_binary_basic(optimal)
-        poly = GraphRel.relpoly_binary_improved(optimal, 0)
-        ham_roots = roots(poly)
-        ham_cycle = GraphTools.hamilton_cycle(optimal)
-
-        print("Hamiltonian: ", False if ham_cycle is None else True,
-              "\nHamiltonian cycle:", ham_cycle,
-              "\nGraph Edges:\n", list(optimal.edges),
-              "\nAvg. polynomial:",sympy.integrate(poly.as_expr(), (p, 0, 1)),
-              "\nRel(G, p):\n", poly,
-              "\nNumber of spanning trees: ", GraphTools.spanning_trees_count(optimal),
-              "\nEdge connectivity: ", nx.edge_connectivity(optimal),
-              "\nMin. k=2 edge-cut:",len(GraphTools.minimum_k_edges_cutsets(optimal, 2)),
-              "\nAutomorphisms group number: ", GraphTools.automorphism_group_number(optimal),
-              "\nNumber of roots: ", len(ham_roots),
-              "\nDiameter: ", nx.diameter(optimal),
-              "\nRel(G, 0.1) = ", poly.subs({p: 0.1}),
-              "\nRel(G, 0.2) = ", poly.subs({p: 0.2}),
-              "\nRel(G, 0.3) = ", poly.subs({p: 0.3}),
-              "\nRel(G, 0.4) = ", poly.subs({p: 0.4}),
-              "\nRel(G, 0.5) = ", poly.subs({p: 0.5}),
-              "\nRel(G, 0.6) = ", poly.subs({p: 0.6}),
-              "\nRel(G, 0.7) = ", poly.subs({p: 0.7}),
-              "\nRel(G, 0.8) = ", poly.subs({p: 0.8}),
-              "\nRel(G, 0.9) = ", poly.subs({p: 0.9}),
-              "\nRoots: \n", ham_roots)
 
     def option_get_multiple_optimal(self):
         path = os.getcwd() + "/Data"
@@ -128,33 +114,6 @@ class Switcher(object):
         n_nodes = int(Utilities.input_number("Input number of nodes:\n"))
         complete = Utilities.ask_yes_no("Analyze the graphs with edges at the range (n to complete graph)?")
         GraphTools.reliability_polynomial_optimal_graphs(n_nodes, complete)
-
-    def option_get_fair_cake(self):
-        print("This option will give all the fair cake constructions of the given 'n' nodes graph")
-        n_nodes = int(Utilities.input_number("Input number of nodes:\n"))
-        analyze = Utilities.ask_yes_no("Analyze the created graphs?")
-
-        path = os.getcwd() + "/Data"
-
-        if not analyze:
-            if os.path.isfile(path + "/Results/" + str(n_nodes) + "n_FairCake" + "_results.txt"):
-                os.remove(path + "/Results/" + str(n_nodes) + "n_FairCake" + "_results.txt")
-            print("Graph; Hamiltonian cycle; Graph Edges",
-                  file=open(path + "/Results/" + str(n_nodes) + "n_FairCake" + "_results.txt", "a"))
-        g_list = list()
-        for i in range(1, int(n_nodes/2) + 1):
-            print("Constructing Fair Cake: " + str(n_nodes) + "n, " + str(i + n_nodes) + "e")
-            fc = GraphRel.fair_cake_algorithm(n_nodes, i)
-            g_list.append(fc)
-
-            if not analyze:
-                print("\n" + "Graph_n" + str(len(fc.nodes)) + "_e" + str(len(fc.edges)) + ";" +
-                      str(GraphTools.hamilton_cycle(fc)) + ";" +
-                      str(sorted(fc.edges())),
-                      file=open(path + "/Results/" + str(n_nodes) + "n_FairCake" + "_results.txt", "a"))
-
-        if analyze:
-            GraphTools.analyze_graphs(g_list, path, str(n_nodes) + "n_FairCake", False)
 
 
     def option_graphs_comparison(self):
@@ -263,17 +222,17 @@ while True:
         ("Select option:\n"
          "1) Generate graphs in .g6 format.\n"
          "2) Generate Hamiltonian graphs in .g6 format.\n"
-         "3) Analyze a .g6 file.\n"
-         "4) Analyze a range of .g6 files.\n"
-         "5) Generate most reliable Hamiltonian graph.\n"
-         "6) Analyze Hamiltonian graphs.\n"
-         "7) Get the most reliable graphs from a range of .g6 files\n"
-         "8) Get the most reliable Hamiltonian and General graph constructions\n"
-         "9) Get the Fair Cake construction\n"
-         "10) Compare two graphs.\n"
-         "11) Compare the best Reliability Polynomial between General and Hamiltonian graphs.\n"
-         "12) Compare the best Reliability Polynomial between General and Hamiltonian graphs on a range of graphs.\n"
-         "13) Compare the coefficients of one graph with the ones of a bunch of graphs.\n"
+         "3) Generate Fair Cake graphs\n"
+         
+         "4) Analyze a .g6 file.\n"
+         "5) Analyze a range of .g6 files.\n"
+         "6) Get the most reliable graphs from a range of .g6 files\n"
+         "7) Get the most reliable Hamiltonian and General graph constructions\n"
+         
+         "8) Compare two graphs.\n"
+         "9) Compare the best Reliability Polynomial between General and Hamiltonian graphs.\n"
+         "10) Compare the best Reliability Polynomial between General and Hamiltonian graphs on a range of graphs.\n"
+         "11) Compare the coefficients of one graph with the ones of a bunch of graphs.\n"
          "0) Exit.\n")
 
     if option == 1:
@@ -283,33 +242,30 @@ while True:
         sw.option_gen_g6_hamiltonian_graphs()
 
     elif option == 3:
-        sw.option_analyze_a_g6_file()
+        sw.option_gen_fair_cake()
 
     elif option == 4:
-        sw.option_analyze_multiple_g6()
+        sw.option_analyze_a_g6_file()
 
     elif option == 5:
-        sw.option_gen_optimal_hamiltonian()
+        sw.option_analyze_multiple_g6()
 
-    elif option == 7:
+    elif option == 6:
         sw.option_get_multiple_optimal()
 
-    elif option == 8:
+    elif option == 7:
         sw.option_get_reliability_polynomial_optimal_graphs()
 
-    elif option == 9:
-        sw.option_get_fair_cake()
-
-    elif option == 10:
+    elif option == 8:
         sw.option_graphs_comparison()
 
-    elif option == 11:
+    elif option == 9:
         sw.option_compare_best_reliabilities()
 
-    elif option == 12:
+    elif option == 10:
         sw.option_range_compare_best_reliabilities()
 
-    elif option == 13:
+    elif option == 11:
         sw.option_compare_coefficients()
 
     elif option == 0:

@@ -1294,6 +1294,20 @@ for i in range(8, 35, 6):
 #GraphTools.gen_g6_file(g_list, "Opt_Hamilton_n" + str(10)+"_ch" + str(3))
 #g_list = GraphTools.gen_all_hamiltonian(10, 3)
 
-grid = nx.grid_2d_graph(2,6)
+# C
+#g = nx.MultiGraph([(0,1), (0,2), (1,2),(1,3), (2,3)])
+#GraphTools.plot(g)
 
-print(GraphRel.relpoly_grid_2xl(grid))
+# C
+#g2 = nx.MultiGraph([(0,1), (0,2), (1,2),(2,3), (2,4), (3,4)])
+#GraphTools.plot(g2)
+
+# C
+#g3 = nx.MultiGraph([(0,1), (0,3), (1,4), (1,2), (2,3), (3,5), (4,5), (4,6), (5,6)])
+#GraphTools.plot(g3)
+
+#
+g3 = nx.MultiGraph([(0,1), (0,3), (1,4), (1,2), (2,3), (3,5), (4,5), (4,6), (5,6)])
+GraphTools.plot(g3)
+
+Benchmarks.relpoly_ordered_cycles_console_benchmark([g3])

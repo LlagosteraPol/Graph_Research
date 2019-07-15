@@ -307,6 +307,24 @@ class AdjMaBox(object):
 class Benchmarks(object):
 
     @staticmethod
+    def relpoly_ordered_cycles_console_benchmark(g_list):
+        """
+        This benchmark test the relpoly_ordered_cycles method
+        :param g_list: List of Networkx graphs to test
+        """
+        p = sympy.symbols("p")
+        for graph in g_list:
+            basic = GraphRel.relpoly_binary_basic(graph)
+            improved = GraphRel.relpoly_ordered_cycles(graph)
+
+            if basic != improved:
+                raise ("Error in graph: \n", list(graph.edges), "\n",
+                       "Correct polynomial: \n", basic, "\n(p=0.6) = ", basic.subs({p: 0.6}), "\n",
+                       "Current polynomial: \n", improved, "\n(p=0.6) = ", improved.subs({p: 0.6}, "\n"))
+
+        print("All correct")
+
+    @staticmethod
     def relpoly_binary_improved_console_benchmark(g_list):
         """
         This benchmark test the relpoly_binary_improved method
@@ -1752,12 +1770,12 @@ class GraphRel(object):
         :return: Reliability polynomial
         """
         h = nx.MultiGraph(g)
-        rel = GraphRel._recursive_basic(h)
+        rel = GraphRel.__recursive_basic(h)
 
         return sympy.simplify(rel)
 
-    @staticmethod
-    def _recursive_basic(g):
+    @classmethod
+    def __recursive_basic(cls, g):
         """
         Recursive contraction-deletion algorithm method that calculates the reliability polynomial
         :param g: Graph to calculate
@@ -1774,8 +1792,8 @@ class GraphRel(object):
             e = choice(list(g.edges()))
             contracted = nx.contracted_edge(g, e, self_loops=False)
             g.remove_edge(*e)
-            rec_deleted = GraphRel._recursive_basic(g)
-            rec_contracted = GraphRel._recursive_basic(contracted)
+            rec_deleted = GraphRel.__recursive_basic(g)
+            rec_contracted = GraphRel.__recursive_basic(contracted)
             s = sympy.Poly(p) * rec_contracted + sympy.Poly(1 - p) * rec_deleted
             return s
 
@@ -1790,13 +1808,13 @@ class GraphRel(object):
         :param filter_depth:
         :return: Reliability polynomial
         """
-        rel = GraphRel._recursive_improved(nx.MultiGraph(g), filter_depth)
+        rel = GraphRel.__recursive_improved(nx.MultiGraph(g), filter_depth)
         # rel = GraphRel._recursive_improved_old(nx.MultiGraph(g))
 
         return sympy.simplify(rel)
 
-    @staticmethod
-    def _recursive_improved(g, filter_depth):
+    @classmethod
+    def __recursive_improved(cls, g, filter_depth):
         """
         This is the improved contraction-deletion algorithm. In each recursion, if there exist some method
         that can retrieve the Reliability Polynomial directly or with less cost than another recursion,
@@ -1824,10 +1842,10 @@ class GraphRel(object):
 
                 other.remove_edge(*e)
                 # AdjMaBox.plot(other)
-                rec_deleted = GraphRel._recursive_improved(other)
+                rec_deleted = GraphRel.__recursive_improved(other)
                 # AdjMaBox.plot(contracted)
 
-                rec_contracted = GraphRel._recursive_improved(contracted)
+                rec_contracted = GraphRel.__recursive_improved(contracted)
 
                 polynomial *= sympy.Poly(p) * rec_contracted + sympy.Poly(1 - p) * rec_deleted
         """
@@ -1884,10 +1902,10 @@ class GraphRel(object):
 
                         other.remove_edge(*e)
                         # AdjMaBox.plot(other)
-                        rec_deleted = GraphRel._recursive_improved(other, filter_depth)
+                        rec_deleted = GraphRel.__recursive_improved(other, filter_depth)
                         # AdjMaBox.plot(contracted)
 
-                        rec_contracted = GraphRel._recursive_improved(contracted, filter_depth)
+                        rec_contracted = GraphRel.__recursive_improved(contracted, filter_depth)
 
                         polynomial *= sympy.Poly(p) * rec_contracted + sympy.Poly(1 - p) * rec_deleted
 

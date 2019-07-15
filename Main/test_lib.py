@@ -184,17 +184,17 @@ def run(focus=False):
     g6_path = os.getcwd() + "/Data/Graph6/"
 
     graph = nx.convert_node_labels_to_integers(nx.grid_2d_graph(2,4))
-    AdjMaBox.plot(graph)
+    GraphTools.plot(graph)
 
-    #TestMethod.RP_Basic
-    """
+    # TestMethod.RP_Basic
+
     if focus:
-        Benchmarks.relpoly_binary_improved_benchmark([graph])
+        Benchmarks.relpoly_binary_improved_console_benchmark([graph])
 
     else:
         #test_relPoly_glued_cycles(None, g_prob, timer=False)
-        Benchmarks.relpoly_binary_improved_benchmark([graph])
-    """
+        Benchmarks.relpoly_binary_improved_console_benchmark([graph])
+
 
 # ----MAIN----
 run(True)
