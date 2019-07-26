@@ -16,6 +16,7 @@ from enum import Enum
 from collections import defaultdict
 import glob
 import time
+import panda as pd
 
 
 class GraphType(Enum):
@@ -23,6 +24,14 @@ class GraphType(Enum):
     PureCycle = 2
     OrderedCycles = 3
     Others = 4
+
+
+class FormatType(Enum):
+    CSV = 1
+    JSON = 2
+    HTML = 3
+    Excel = 4
+    SQL = 5
 
 
 class Utilities(object):
@@ -518,6 +527,97 @@ class GraphTools(object):
             r_graph = GraphTools.get_random_treecyc(tree_nodes, max_cycle_nodes)
             graph_id = 'r_treecyc_' + str(i)
             AdjMaBox.write_matrix(r_graph, path + graph_id)
+
+    @staticmethod
+    def data_analysis(graph, l_prev_graph=None, binomial_format=False, fast=False):
+        p = sympy.symbols("p")
+        ham_cycle = GraphTools.hamilton_cycle(graph)
+
+        if fast:
+            data = {'Graph': "Graph_n" + str(len(graph.nodes)) + "_e" + str(len(graph.edges)),
+                    'Hamiltonian': False if ham_cycle is None else True,
+                    'Hamiltonian cycle': ham_cycle,
+                    'Graph Edges': sorted(graph.edges()),
+                    'Spanning Trees': GraphTools.spanning_trees_count(graph),
+                    'Edge connectivity': nx.edge_connectivity(graph),
+                    'Min. k=2 edge-cut': len(GraphTools.minimum_k_edges_cutsets(graph, 2)),
+                    'Automorphisms': GraphTools.automorphism_group_number(graph),
+                    'Diameter': nx.diameter(graph)}
+
+        else:
+
+            poly = GraphRel.relpoly_binary_improved(graph, 0)
+
+            is_sub_graph = False
+            if type(l_prev_graph) is list:
+                for prev_graph in l_prev_graph:
+                    if GraphTools.check_one_edge_less_subgraph_isomorphism(graph, prev_graph):
+                        is_sub_graph = True
+                        break
+
+            bin_poly = None
+            if binomial_format:
+                bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
+
+            data = {'Graph': "Graph_n" + str(len(graph.nodes)) + "_e" + str(len(graph.edges)),
+                    'Super Graph': is_sub_graph if type(l_prev_graph) is list else "--",
+                    'Hamiltonian': False if ham_cycle is None else True,
+                    'Hamiltonian cycle': ham_cycle,
+                    'Graph Edges': sorted(graph.edges()),
+                    'Avg. polynomial': sympy.integrate(poly.as_expr(), (p, 0, 1)),
+                    'Polynomial': bin_poly if  binomial_format else poly,
+                    'Spanning Trees': GraphTools.spanning_trees_count(graph),
+                    'Edge connectivity': nx.edge_connectivity(graph),
+                    'Min. k=2 edge-cut': len(GraphTools.minimum_k_edges_cutsets(graph, 2)),
+                    'Automorphisms': GraphTools.automorphism_group_number(graph),
+                    'Diameter': nx.diameter(graph),
+                    'Probability 0.1': poly.subs({p: 0.1}),
+                    'Probability 0.2': poly.subs({p: 0.2}),
+                    'Probability 0.3': poly.subs({p: 0.3}),
+                    'Probability 0.4': poly.subs({p: 0.4}),
+                    'Probability 0.5': poly.subs({p: 0.5}),
+                    'Probability 0.6': poly.subs({p: 0.6}),
+                    'Probability 0.7': poly.subs({p: 0.7}),
+                    'Probability 0.8': poly.subs({p: 0.8}),
+                    'Probability 0.9': poly.subs({p: 0.9})}
+
+        return pd.DataFrame(data)
+
+    @staticmethod
+    def print_data(data, write_fomat, path):
+
+        if write_fomat == FormatType.CSV:
+            data.to_csv(path)
+
+        elif write_fomat == FormatType.JSON:
+            data.to_json(path)
+
+        elif write_fomat == FormatType.HTML:
+            data.to_html(path)
+
+        elif write_fomat == FormatType.Excel:
+            data.to_excel(path)
+
+        elif write_fomat == FormatType.SQL:
+            data.to_sql(path)
+
+    @staticmethod
+    def read_data(read_format, path):
+
+        if read_format == FormatType.CSV:
+            return pd.read_csv(path)
+
+        elif read_format == FormatType.JSON:
+            return pd.read_json(path)
+
+        elif read_format == FormatType.HTML:
+            return pd.read_html(path)
+
+        elif read_format == FormatType.Excel:
+            return pd.read_excel(path)
+
+        elif read_format == FormatType.SQL:
+            return pd.read_sql(path)
 
     @classmethod
     def __analytics_header(cls, check_super_graph=False, check_coefficients=False):
