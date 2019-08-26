@@ -1306,8 +1306,12 @@ for i in range(8, 35, 6):
 #g3 = nx.MultiGraph([(0,1), (0,3), (1,4), (1,2), (2,3), (3,5), (4,5), (4,6), (5,6)])
 #GraphTools.plot(g3)
 
-#
-g3 = nx.MultiGraph([(0,1), (0,3), (1,4), (1,2), (2,3), (3,5), (4,5), (4,6), (5,6)])
-GraphTools.plot(g3)
+# c
+#g4 = nx.MultiGraph([(0,1), (0,3), (1,4), (1,2), (2,3), (3,5), (4,5), (4,6), (5,6)])
+#GraphTools.plot(g4)
 
-Benchmarks.relpoly_ordered_cycles_console_benchmark([g3])
+#Benchmarks.relpoly_ordered_cycles_console_benchmark([g3])
+
+hams = GraphTools.gen_all_hamiltonian(10, 20)
+
+Benchmarks.relpoly_binary_improved_console_benchmark(hams, 100)

@@ -16,7 +16,7 @@ from enum import Enum
 from collections import defaultdict
 import glob
 import time
-import panda as pd
+import pandas as pd
 
 
 class GraphType(Enum):
@@ -72,6 +72,33 @@ class Utilities(object):
                 continue
             else:
                 return user_input
+
+    @staticmethod
+    def input_data_format(message):
+        """
+        Simple function to ask the user to input the data format of the desired file.
+        :param message: Message that will be shown to the user.
+        :return: enum<FormatType>
+        """
+        while True:
+            format_type = int(input(message + "\n"))
+            if format_type == 1:
+                return FormatType.CSV
+
+            elif format_type == 2:
+                return FormatType.Excel
+
+            elif format_type == 3:
+                return FormatType.HTML
+
+            elif format_type == 4:
+                return FormatType.JSON
+
+            elif format_type == 5:
+                return FormatType.SQL
+
+            else:
+                print("Not a valid number")
 
     @staticmethod
     def ask_yes_no(message):
@@ -334,18 +361,19 @@ class Benchmarks(object):
         print("All correct")
 
     @staticmethod
-    def relpoly_binary_improved_console_benchmark(g_list):
+    def relpoly_binary_improved_console_benchmark(g_list, filter_depth=0):
         """
         This benchmark test the relpoly_binary_improved method
         :param g_list: List of Networkx graphs to test
+        :param filter_depth: number of subgraphs that will be analyzed to determine if they're ordered cycles
         """
         p = sympy.symbols("p")
         for graph in g_list:
             basic = GraphRel.relpoly_binary_basic(graph)
-            improved = GraphRel.relpoly_binary_improved(graph)
+            improved = GraphRel.relpoly_binary_improved(graph, filter_depth)
 
             if basic != improved:
-                raise ("Error in graph: \n", list(graph.edges), "\n",
+                raise ValueError("Error in graph: \n", list(graph.edges), "\n",
                        "Correct polynomial: \n", basic, "\n(p=0.6) = ", basic.subs({p: 0.6}), "\n",
                        "Current polynomial: \n", improved, "\n(p=0.6) = ", improved.subs({p: 0.6}, "\n"))
 
@@ -529,7 +557,7 @@ class GraphTools(object):
             AdjMaBox.write_matrix(r_graph, path + graph_id)
 
     @staticmethod
-    def data_analysis(graph, l_prev_graph=None, binomial_format=False, fast=False):
+    def data_analysis(graph, binomial_format=False, fast=False, l_prev_graph=None):
         p = sympy.symbols("p")
         ham_cycle = GraphTools.hamilton_cycle(graph)
 
@@ -584,25 +612,28 @@ class GraphTools(object):
         return pd.DataFrame(data)
 
     @staticmethod
-    def print_data(data, write_fomat, path):
+    def data_print(data, write_fomat, path):
 
         if write_fomat == FormatType.CSV:
-            data.to_csv(path)
+            data.to_csv(path + ".csv")
 
         elif write_fomat == FormatType.JSON:
-            data.to_json(path)
+            data.to_json(path + ".json")
 
         elif write_fomat == FormatType.HTML:
-            data.to_html(path)
+            data.to_html(path + ".html")
 
         elif write_fomat == FormatType.Excel:
-            data.to_excel(path)
+            data.to_excel(path + ".xml")
 
+        """
         elif write_fomat == FormatType.SQL:
-            data.to_sql(path)
+            engine = create_engine('sqlite://', echo=False)
+            data.to_sql(path + ".sql", con=engine)
+        """
 
     @staticmethod
-    def read_data(read_format, path):
+    def data_read(read_format, path):
 
         if read_format == FormatType.CSV:
             return pd.read_csv(path)
@@ -1155,7 +1186,7 @@ class GraphTools(object):
             raise ValueError("The number of edges must be at least equal to the number of nodes\n")
 
         #  More edges than the complete graph
-        elif n_edges > (n_nodes * (n_nodes - 1)) / 2:
+        elif (n_edges + chords) > (n_nodes * (n_nodes - 1)) / 2:
             raise ValueError("The number of edges exceed the complete graph "
                              "with the given nodes (too much edges)")
 
@@ -1905,7 +1936,7 @@ class GraphRel(object):
         """
         Provides the Reliability Polynomial using an improved contraction-deletion algorithm
         :param g: Graph to calculate
-        :param filter_depth:
+        :param filter_depth: number of subgraphs that will be analyzed to determine if they're ordered cycles
         :return: Reliability polynomial
         """
         rel = GraphRel.__recursive_improved(nx.MultiGraph(g), filter_depth)
@@ -1920,6 +1951,7 @@ class GraphRel(object):
         that can retrieve the Reliability Polynomial directly or with less cost than another recursion,
         will retrieve it and stop the recursion in that generated sub-graph.
         :param g: Networkx graph
+        :param filter_depth: number of subgraphs that will be analyzed to determine if they're ordered cycles
         :return: The reliability Polynomial of the given graph or another execution of the method.
         """
         # print("---------Input graph-----")

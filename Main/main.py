@@ -51,8 +51,7 @@ class Switcher(object):
             GraphTools.analyze_graphs(g_list, path, str(n_nodes) + "n_FairCake", False)
 
     def option_analyze_a_g6_file(self):
-        print("This option will analyze a graph in .g6 format within the range of 'n' nodes (minimum-maximum), "
-              "and 'e' edges")
+        print("This option will the analyze graphs inside a .g6 file.")
 
         g_list, file_name = Utilities.input_g6_file("Enter the name of the .g6 file.")
         fast = Utilities.ask_yes_no("Do you want to execute a fast but with less information analysis?")
@@ -213,6 +212,28 @@ class Switcher(object):
 
         GraphTools.compare_graphs("Coef" + graph1[1], graph1[0][0], filtered_ham, False, True)
 
+    def option_testing(self):
+        print("This option will the analyze graphs inside a .g6 file and print the results in the desired format.")
+
+        g_list, file_name = Utilities.input_g6_file("Enter the name of the .g6 file.")
+        fast = Utilities.ask_yes_no("Do you want to execute a fast but with less information analysis?")
+
+        df = GraphTools.data_analysis(g_list[0], True, fast)
+
+        """
+        write_format = Utilities.input_data_format("Select the saving format for the resulting data:\n"
+                                                   "1) CSV\n"
+                                                   "2) Excel\n"
+                                                   "3) HTML\n"
+                                                   "4) JSON\n"
+                                                   "5) SQL")
+
+        GraphTools.data_print(df, write_format, os.getcwd() + "/Data/DB/" + "DB_file_name")
+        """
+        GraphTools.data_print(df, FormatType.CSV, os.getcwd() + "/Data/DB/" + "DB_file_name")
+        GraphTools.data_print(df, FormatType.JSON, os.getcwd() + "/Data/DB/" + "DB_file_name")
+        GraphTools.data_print(df, FormatType.HTML, os.getcwd() + "/Data/DB/" + "DB_file_name")
+        #GraphTools.data_print(df, FormatType.Excel, os.getcwd() + "/Data/DB/" + "DB_file_name")
 # ----------------------------------------------------USER INTERFACE----------------------------------------------------
 
 sw = Switcher()
@@ -233,6 +254,8 @@ while True:
          "9) Compare the best Reliability Polynomial between General and Hamiltonian graphs.\n"
          "10) Compare the best Reliability Polynomial between General and Hamiltonian graphs on a range of graphs.\n"
          "11) Compare the coefficients of one graph with the ones of a bunch of graphs.\n"
+         
+         "12) Testing: Analysis and print data.\n"
          "0) Exit.\n")
 
     if option == 1:
@@ -267,6 +290,9 @@ while True:
 
     elif option == 11:
         sw.option_compare_coefficients()
+
+    elif option == 12:
+        sw.option_testing()
 
     elif option == 0:
         break
