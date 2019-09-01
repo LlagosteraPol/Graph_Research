@@ -1312,6 +1312,10 @@ for i in range(8, 35, 6):
 
 #Benchmarks.relpoly_ordered_cycles_console_benchmark([g3])
 
-hams = GraphTools.gen_all_hamiltonian(10, 20)
+#hams = GraphTools.gen_all_hamiltonian(10, 20)
 
-Benchmarks.relpoly_binary_improved_console_benchmark(hams, 100)
+#Benchmarks.relpoly_binary_improved_console_benchmark(hams, 100)
+
+tt = nx.Graph([(0, 6), (0, 9), (1, 7), (1, 8), (2, 7), (2, 9), (3, 7), (3, 10), (4, 8), (4, 9), (5, 8), (5, 10), (6, 10)]
+)
+GraphTools.plot(tt)

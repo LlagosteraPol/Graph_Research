@@ -1120,7 +1120,7 @@ class GraphTools(object):
         print(decoded, file=open(os.getcwd() + "/Data/Graph6/" + file_name + ".g6", "w"))
 
     @staticmethod
-    def generate_hamiltonian(n_nodes, chords, p_new_connection=0.1):
+    def generate_random_hamiltonian(n_nodes, chords, p_new_connection=0.1):
         """
         Generate a random Hamiltonian graph with the nodes and chords provided
         :param n_nodes: Number of nodes of the graph
@@ -1231,7 +1231,7 @@ class GraphTools(object):
         """
         cycle = nx.cycle_graph(n_nodes)
 
-        # Get the nodes of the graph, less the ones of the n_nodes chord
+        # Get the nodes of the graph
         nodes = list(cycle.nodes())
 
         # Set the diametrical chord
@@ -1239,6 +1239,7 @@ class GraphTools(object):
         d2 = nodes[int(len(nodes)/2)]
         cycle.add_edge(d1, d2)
 
+        # Remove the nodes of the added chord from the nodes list
         nodes.remove(0)
         nodes.remove(int(n_nodes/2))
         nodes_p1 = nodes[:int(len(nodes)/2)]
@@ -1590,6 +1591,33 @@ class GraphTools(object):
         return list(nodes)
 
     @staticmethod
+    def get_all_connected_graphs(g):
+        """
+        For each subset of k disconnected edges, gives all the connected graphs
+        only if there aren't any disconnected ones.
+        :param g: Networkx graph
+        :return: Dictionary where <key>: number of deleted edges, <value> list of connected graphs
+        """
+        connected_graphs = {}
+        l_edges = list(g.edges())
+        dsc = 1  # number of edge disconnections
+
+        while dsc < len(l_edges):
+            aux_l = list()
+            for subset in itt.combinations(l_edges, dsc):
+                tmp_g = copy.deepcopy(g)
+                tmp_g.remove_edges_from(subset)
+
+                if nx.is_connected(tmp_g):
+                    aux_l.append(tmp_g)
+
+            if aux_l == list():
+                return connected_graphs
+
+            connected_graphs[dsc] = aux_l
+            dsc += 1
+
+    @staticmethod
     def differentiate_ordered_cycles(cycles):
         """
         Differentiate the mixed cycles by the following rules:
@@ -1889,7 +1917,6 @@ class GraphTools(object):
         poly3 = poly3_p1 + poly3_p2 + poly3_p3 + poly3_p4 - subtract
 
         return sympy.simplify(poly1), sympy.simplify(poly2), sympy.simplify(poly3)
-
 
 class GraphRel(object):
 
