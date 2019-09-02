@@ -16,6 +16,8 @@ from enum import Enum
 from collections import defaultdict
 import glob
 import time
+from sqlalchemy import create_engine
+from sqlalchemy.types import Integer
 import pandas as pd
 
 
@@ -374,8 +376,8 @@ class Benchmarks(object):
 
             if basic != improved:
                 raise ValueError("Error in graph: \n", list(graph.edges), "\n",
-                       "Correct polynomial: \n", basic, "\n(p=0.6) = ", basic.subs({p: 0.6}), "\n",
-                       "Current polynomial: \n", improved, "\n(p=0.6) = ", improved.subs({p: 0.6}, "\n"))
+                                 "Correct polynomial: \n", basic, "\n(p=0.6) = ", basic.subs({p: 0.6}), "\n",
+                                 "Current polynomial: \n", improved, "\n(p=0.6) = ", improved.subs({p: 0.6}, "\n"))
 
         print("All correct")
 
@@ -607,7 +609,7 @@ class GraphTools(object):
                     'Hamiltonian cycle': ham_cycle,
                     'Graph Edges': sorted(graph.edges()),
                     'Avg. polynomial': sympy.integrate(poly.as_expr(), (p, 0, 1)),
-                    'Polynomial': bin_poly if  binomial_format else poly,
+                    'Polynomial': bin_poly if binomial_format else poly,
                     'Spanning Trees': GraphTools.spanning_trees_count(graph),
                     'Edge connectivity': nx.edge_connectivity(graph),
                     'Min. k=2 edge-cut': len(GraphTools.minimum_k_edges_cutsets(graph, 2)),
@@ -695,8 +697,8 @@ class GraphTools(object):
                 "Probability 0.7; "
                 "Probability 0.8; "
                 "Probability 0.9; ")
-                # ("Greater coeffs.?; " if check_coefficients else ""))
-                # "Roots")
+        # ("Greater coeffs.?; " if check_coefficients else ""))
+        # "Roots")
 
     @classmethod
     def __analytics_body(cls, graph, l_prev_graph=None, check_coefficients=False):
@@ -762,7 +764,7 @@ class GraphTools(object):
                 str(poly.subs({p: 0.7})) + ";" +
                 str(poly.subs({p: 0.8})) + ";" +
                 str(poly.subs({p: 0.9})))  # + ";" +
-                # str(poly_roots))
+        # str(poly_roots))
 
     @classmethod
     def __analytics_header_fast(cls):
@@ -1250,14 +1252,14 @@ class GraphTools(object):
 
         # Set the diametrical chord
         d1 = nodes[0]
-        d2 = nodes[int(len(nodes)/2)]
+        d2 = nodes[int(len(nodes) / 2)]
         cycle.add_edge(d1, d2)
 
         # Remove the nodes of the added chord from the nodes list
         nodes.remove(0)
-        nodes.remove(int(n_nodes/2))
-        nodes_p1 = nodes[:int(len(nodes)/2)]
-        nodes_p2 = nodes[int(len(nodes)/2):]
+        nodes.remove(int(n_nodes / 2))
+        nodes_p1 = nodes[:int(len(nodes) / 2)]
+        nodes_p2 = nodes[int(len(nodes) / 2):]
 
         # Get possible chords
         possible_edges = list()
@@ -1874,14 +1876,14 @@ class GraphTools(object):
                    a * (b + c) + \
                    a * d + \
                    (b + c) * d + \
-                    \
+ \
                    (f + a) * b + \
                    (f + a) * (c + d) + \
                    (f + a) * e + \
                    b * (c + d) + \
                    b * e + \
                    (c + d) * e + \
-                    \
+ \
                    (a + b) * c + \
                    (a + b) * (d + e) + \
                    (a + b) * f + \
@@ -1930,6 +1932,62 @@ class GraphTools(object):
         poly3 = poly3_p1 + poly3_p2 + poly3_p3 + poly3_p4 - subtract
 
         return sympy.simplify(poly1), sympy.simplify(poly2), sympy.simplify(poly3)
+
+
+class DBinterface(object):
+
+    def __init__(self, db_name="Graphs_DB"):
+        self.db_name = db_name
+        # Establish a connection with the Data Base
+        self.engine = create_engine('sqlite:///' + os.getcwd() + '/Data/DDBB/' + db_name + '.db', echo=False)
+
+    def create_db_skeleton(self):
+        df = pd.DataFrame({'G6': [np.nan],
+                           'Graph': [np.nan],
+                           'Super Graph': [np.nan],
+                           'Hamiltonian': [np.nan],
+                           'Hamiltonian cycle': [np.nan],
+                           'Graph Edges': [np.nan],
+                           'Avg. polynomial': [np.nan],
+                           'Polynomial': [np.nan],
+                           'Spanning Trees': [np.nan],
+                           'Edge connectivity': [np.nan],
+                           'Min. k=2 edge-cut': [np.nan],
+                           'Automorphisms': [np.nan],
+                           'Diameter': [np.nan],
+                           'Probability 0.1': [np.nan],
+                           'Probability 0.2': [np.nan],
+                           'Probability 0.3': [np.nan],
+                           'Probability 0.4': [np.nan],
+                           'Probability 0.5': [np.nan],
+                           'Probability 0.6': [np.nan],
+                           'Probability 0.7': [np.nan],
+                           'Probability 0.8': [np.nan],
+                           'Probability 0.9': [np.nan]})
+
+        df.set_index('G6', inplace=True)
+        df.to_sql('Graphs', con=self.engine)
+
+    def add_columns(self, table_name, cols):
+        df = self.get_table(table_name)
+        pd.concat([df, pd.DataFrame(columns=cols)])
+
+    def write_df(self, df, table_name):
+        df.to_sql(table_name, con=self.engine)
+
+    def get_table(self, table_name):
+        return pd.read_sql_table('table_name', 'sqlite:///' + os.getcwd() + '/Data/DDBB/' + self.db_name + '.db')
+
+    def read_graph(self, graph_id):
+        return pd.read_sql_query()  # TODO: Finish
+
+    def get_engine(self):
+        """
+        Getter for the 'engine' (connection to the data base)
+        :return: <engine> from the library sqlalchemy
+        """
+        return (self.engine)
+
 
 class GraphRel(object):
 
@@ -2364,7 +2422,7 @@ class GraphRel(object):
         return polynomial
 
     @staticmethod
-    def relpoly_multi_treecyc(bal_pedges, tree_edges, cycle_edges, g = None):
+    def relpoly_multi_treecyc(bal_pedges, tree_edges, cycle_edges, g=None):
         """
         This method combines the methods relpoly_multicycle and relpoly_multitree to get the reliability
         Polynomial of any Tree+Cycles graph (multiedge or not).
@@ -2421,7 +2479,7 @@ class GraphRel(object):
 
         rel_g = omegas * prev_p
 
-        #return sympy.simplify(rel_g)  # Slower performance
+        # return sympy.simplify(rel_g)  # Slower performance
         return rel_g
 
     @staticmethod
@@ -2828,7 +2886,7 @@ class GraphRel(object):
         if plus == 1 or 5:
             raise ValueError('The addition must be 2, 3 or 4')
 
-        n_nodes = 6*k
+        n_nodes = 6 * k
 
         # No chords
         if ch == 0:
@@ -2837,14 +2895,14 @@ class GraphRel(object):
         c_lenght = ch * 2  # Number of paths
 
         # Calculate the number of k and k+1 paths
-        nk_1 = modf((6*k+plus)/c_lenght)[0] * c_lenght
+        nk_1 = modf((6 * k + plus) / c_lenght)[0] * c_lenght
         nk = c_lenght - nk_1
 
         # Construct the vector
         c_path = []
         while len(c_path) < c_lenght:
             if nk_1 > 0:
-                c_path.append(int((n_nodes/c_lenght)+1))
+                c_path.append(int((n_nodes / c_lenght) + 1))
                 nk_1 -= 1
 
             if nk > 0:
