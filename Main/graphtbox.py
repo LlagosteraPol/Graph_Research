@@ -476,6 +476,20 @@ class GraphTools(object):
         return False
 
     @staticmethod
+    def check_isomorphism(g1, g2):
+        """
+        Simple method to check isomorphism between two graphs
+        :param g1: Networkx Graph
+        :param g2: Networkx Graph
+        :return: True if they're isomorphic, false otherwise
+        """
+        gm = nx.algorithms.isomorphism.GraphMatcher(g1, g2)
+        if gm.is_isomorphic():
+            return True
+        else:
+            return False
+
+    @staticmethod
     def minimum_k_edges_cutsets(g, k):
         """
         Method to calculate the minimum cut-sets in a graph with k edges.
@@ -1593,8 +1607,7 @@ class GraphTools(object):
     @staticmethod
     def get_all_connected_graphs(g):
         """
-        For each subset of k disconnected edges, gives all the connected graphs
-        only if there aren't any disconnected ones.
+        For each subset of k disconnected edges, gives all the connected graphs.
         :param g: Networkx graph
         :return: Dictionary where <key>: number of deleted edges, <value> list of connected graphs
         """
