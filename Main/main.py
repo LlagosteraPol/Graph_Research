@@ -220,7 +220,7 @@ class Switcher(object):
 
         df = GraphTools.data_analysis(g_list[0], True, fast)
 
-        """
+
         write_format = Utilities.input_data_format("Select the saving format for the resulting data:\n"
                                                    "1) CSV\n"
                                                    "2) Excel\n"
@@ -228,12 +228,13 @@ class Switcher(object):
                                                    "4) JSON\n"
                                                    "5) SQL")
 
-        GraphTools.data_print(df, write_format, os.getcwd() + "/Data/DB/" + "DB_file_name")
+        GraphTools.data_print(df, write_format, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
         """
-        GraphTools.data_print(df, FormatType.CSV, os.getcwd() + "/Data/DB/" + "DB_file_name")
-        GraphTools.data_print(df, FormatType.JSON, os.getcwd() + "/Data/DB/" + "DB_file_name")
-        GraphTools.data_print(df, FormatType.HTML, os.getcwd() + "/Data/DB/" + "DB_file_name")
-        #GraphTools.data_print(df, FormatType.Excel, os.getcwd() + "/Data/DB/" + "DB_file_name")
+        GraphTools.data_print(df, FormatType.CSV, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
+        GraphTools.data_print(df, FormatType.JSON, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
+        GraphTools.data_print(df, FormatType.HTML, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
+        #GraphTools.data_print(df, FormatType.Excel, os.getcwd() + "/Data/DDBB/" + "DB_file_name")
+        """
 # ----------------------------------------------------USER INTERFACE----------------------------------------------------
 
 sw = Switcher()

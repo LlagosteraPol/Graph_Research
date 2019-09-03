@@ -16,8 +16,7 @@ from enum import Enum
 from collections import defaultdict
 import glob
 import time
-from sqlalchemy import create_engine
-from sqlalchemy.types import Integer
+import sqlalchemy as alchemy
 import pandas as pd
 
 
@@ -578,7 +577,8 @@ class GraphTools(object):
         ham_cycle = GraphTools.hamilton_cycle(graph)
 
         if fast:
-            data = {'Graph': "Graph_n" + str(len(graph.nodes)) + "_e" + str(len(graph.edges)),
+            data = {'G6': nx.to_graph6_bytes(graph, nodes=None, header=False),
+                    'Graph': "Graph_n" + str(len(graph.nodes)) + "_e" + str(len(graph.edges)),
                     'Hamiltonian': False if ham_cycle is None else True,
                     'Hamiltonian cycle': ham_cycle,
                     'Graph Edges': sorted(graph.edges()),
@@ -603,13 +603,18 @@ class GraphTools(object):
             if binomial_format:
                 bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
 
-            data = {'Graph': "Graph_n" + str(len(graph.nodes)) + "_e" + str(len(graph.edges)),
+            edg = str(sorted(graph.edges()))
+            st_edg = str(edg)
+
+
+            data = {'G6': nx.to_graph6_bytes(graph, nodes=None, header=False),
+                    'Graph': "Graph_n" + str(len(graph.nodes)) + "_e" + str(len(graph.edges)),
                     'Super Graph': is_sub_graph if type(l_prev_graph) is list else "--",
                     'Hamiltonian': False if ham_cycle is None else True,
-                    'Hamiltonian cycle': ham_cycle,
-                    'Graph Edges': sorted(graph.edges()),
+                    'Hamiltonian cycle': str(ham_cycle),
+                    'Graph Edges': str(sorted(graph.edges())),
                     'Avg. polynomial': sympy.integrate(poly.as_expr(), (p, 0, 1)),
-                    'Polynomial': bin_poly if binomial_format else poly,
+                    'Polynomial': str(bin_poly) if binomial_format else str(poly),
                     'Spanning Trees': GraphTools.spanning_trees_count(graph),
                     'Edge connectivity': nx.edge_connectivity(graph),
                     'Min. k=2 edge-cut': len(GraphTools.minimum_k_edges_cutsets(graph, 2)),
@@ -625,7 +630,7 @@ class GraphTools(object):
                     'Probability 0.8': poly.subs({p: 0.8}),
                     'Probability 0.9': poly.subs({p: 0.9})}
 
-        return pd.DataFrame(data)
+        return pd.DataFrame(data, index=[0])
 
     @staticmethod
     def data_print(data, write_fomat, path):
@@ -642,11 +647,9 @@ class GraphTools(object):
         elif write_fomat == FormatType.Excel:
             data.to_excel(path + ".xml")
 
-        """
         elif write_fomat == FormatType.SQL:
-            engine = create_engine('sqlite://', echo=False)
-            data.to_sql(path + ".sql", con=engine)
-        """
+            db = DBinterface()
+            db.write_df(data)
 
     @staticmethod
     def data_read(read_format, path):
@@ -1935,13 +1938,18 @@ class GraphTools(object):
 
 
 class DBinterface(object):
+    main_table = 'Graphs'
 
     def __init__(self, db_name="Graphs_DB"):
         self.db_name = db_name
         # Establish a connection with the Data Base
-        self.engine = create_engine('sqlite:///' + os.getcwd() + '/Data/DDBB/' + db_name + '.db', echo=False)
+        self.engine = alchemy.create_engine('sqlite:///' + os.getcwd() + '/Data/DDBB/' + db_name + '.db', echo=False)
+        self.main_table = 'Graphs'
+        check = self.engine.has_table(self.main_table)
+        if not check:
+            self.create_main_table()
 
-    def create_db_skeleton(self):
+    def create_main_table(self):
         df = pd.DataFrame({'G6': [np.nan],
                            'Graph': [np.nan],
                            'Super Graph': [np.nan],
@@ -1966,17 +1974,62 @@ class DBinterface(object):
                            'Probability 0.9': [np.nan]})
 
         df.set_index('G6', inplace=True)
-        df.to_sql('Graphs', con=self.engine)
+        df.to_sql('Graphs', con=self.engine, index=False,
+                  dtype={'G6': alchemy.types.String(),
+                         'Graph': alchemy.types.String(),
+                         'Super Graph': alchemy.types.String(),
+                         'Hamiltonian': alchemy.types.BOOLEAN(),
+                         'Hamiltonian cycle': alchemy.types.String(),
+                         'Graph Edges': alchemy.types.String(),
+                         'Avg. polynomial': alchemy.types.FLOAT(),
+                         'Polynomial': alchemy.types.String(),
+                         'Spanning Trees': alchemy.INTEGER(),
+                         'Edge connectivity': alchemy.INTEGER(),
+                         'Min. k=2 edge-cut': alchemy.INTEGER(),
+                         'Automorphisms': alchemy.INTEGER(),
+                         'Diameter': alchemy.INTEGER(),
+                         'Probability 0.1': alchemy.types.FLOAT(),
+                         'Probability 0.2': alchemy.types.FLOAT(),
+                         'Probability 0.3': alchemy.types.FLOAT(),
+                         'Probability 0.4': alchemy.types.FLOAT(),
+                         'Probability 0.5': alchemy.types.FLOAT(),
+                         'Probability 0.6': alchemy.types.FLOAT(),
+                         'Probability 0.7': alchemy.types.FLOAT(),
+                         'Probability 0.8': alchemy.types.FLOAT(),
+                         'Probability 0.9': alchemy.types.FLOAT()})
 
-    def add_columns(self, table_name, cols):
+    def add_columns(self, cols, table_name=main_table):
         df = self.get_table(table_name)
         pd.concat([df, pd.DataFrame(columns=cols)])
 
-    def write_df(self, df, table_name):
-        df.to_sql(table_name, con=self.engine)
+    def write_df(self, df, table_name=main_table):
+        df.to_sql(table_name, con=self.engine, if_exists='append',
+                  dtype={'G6': alchemy.types.String(),
+                         'Graph': alchemy.types.String(),
+                         'Super Graph': alchemy.types.String(),
+                         'Hamiltonian': alchemy.types.BOOLEAN(),
+                         'Hamiltonian cycle': alchemy.types.String(),
+                         'Graph Edges': alchemy.types.String(),
+                         'Avg. polynomial': alchemy.types.FLOAT(),
+                         'Polynomial': alchemy.types.String(),
+                         'Spanning Trees': alchemy.INTEGER(),
+                         'Edge connectivity': alchemy.INTEGER(),
+                         'Min. k=2 edge-cut': alchemy.INTEGER(),
+                         'Automorphisms': alchemy.INTEGER(),
+                         'Diameter': alchemy.INTEGER(),
+                         'Probability 0.1': alchemy.types.FLOAT(),
+                         'Probability 0.2': alchemy.types.FLOAT(),
+                         'Probability 0.3': alchemy.types.FLOAT(),
+                         'Probability 0.4': alchemy.types.FLOAT(),
+                         'Probability 0.5': alchemy.types.FLOAT(),
+                         'Probability 0.6': alchemy.types.FLOAT(),
+                         'Probability 0.7': alchemy.types.FLOAT(),
+                         'Probability 0.8': alchemy.types.FLOAT(),
+                         'Probability 0.9': alchemy.types.FLOAT()}
+                  )
 
-    def get_table(self, table_name):
-        return pd.read_sql_table('table_name', 'sqlite:///' + os.getcwd() + '/Data/DDBB/' + self.db_name + '.db')
+    def get_table(self, table_name=main_table):
+        return pd.read_sql_table(table_name, 'sqlite:///' + os.getcwd() + '/Data/DDBB/' + self.db_name + '.db')
 
     def read_graph(self, graph_id):
         return pd.read_sql_query()  # TODO: Finish

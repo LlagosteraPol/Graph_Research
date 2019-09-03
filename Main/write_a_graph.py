@@ -1316,5 +1316,27 @@ for i in range(8, 35, 6):
 
 #Benchmarks.relpoly_binary_improved_console_benchmark(hams, 100)
 
-db_int = DBinterface()
-db_int.create_db_skeleton()
+n7e12 = nx.Graph([(0, 3), (0, 4), (0, 5), (0, 6), (1, 3), (1, 4), (1, 5), (1, 6), (2, 4), (2, 5), (2, 6), (3, 6)]
+)
+n8e12 = nx.Graph([(0, 3), (0, 4), (0, 5), (1, 4), (1, 5), (1, 6), (2, 5), (2, 6), (2, 7), (3, 6), (3, 7), (4, 7)]
+)
+n10e15 = nx.Graph([(0, 3), (0, 6), (0, 9), (1, 4), (1, 6), (1, 8), (2, 5), (2, 6), (2, 7), (3, 7), (3, 8), (4, 7), (4, 9), (5, 8), (5, 9)]
+)
+n10e17 = nx.Graph([(0, 8), (0, 9), (1, 8), (1, 9), (2, 8), (2, 9), (3, 8), (3, 9), (4, 8), (4, 9), (5, 8), (5, 9), (6, 8), (6, 9), (7, 8), (7, 9), (8, 9)]
+)
+n21e24 = nx.Graph([(0, 1), (0, 10), (0, 20), (1, 2), (2, 3), (3, 4), (3, 14), (4, 5), (5, 6), (6, 7), (7, 8), (7, 17), (8, 9), (9, 10), (10, 11), (11, 12), (12, 13), (13, 14), (14, 15), (15, 16), (16, 17), (17, 18), (18, 19), (19, 20)]
+)
+
+time_start = time.process_time()
+pol = Utilities.polynomial2binomial(GraphRel.relpoly_binary_improved(n7e12))
+time_elapsed = (time.process_time() - time_start)
+print("Reliability improved: ", time_elapsed)
+
+
+time_start = time.process_time()
+connections = GraphTools.get_all_connected_graphs(n7e12)
+n_g = list()
+for element in connections.values():
+    n_g.append(len(element))
+time_elapsed = (time.process_time() - time_start)
+print("Connected components: ", time_elapsed)
