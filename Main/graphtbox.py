@@ -16,8 +16,36 @@ from enum import Enum
 from collections import defaultdict
 import glob
 import time
-import sqlalchemy as alchemy
+import sqlalchemy as sql
+from sqlalchemy import orm
 import pandas as pd
+from sqlalchemy.ext.declarative import declarative_base
+
+
+class Data_Graph(declarative_base()):
+    __tablename__ = 'Graphs'
+    g6 = sql.Column('G6', sql.types.String(), primary_key=True)
+    name =sql.Column('Graph', sql.types.String())
+    sp_name = sql.Column('Super Graph', sql.types.String())
+    hamiltonian = sql.Column('Hamiltonian', sql.types.BOOLEAN())
+    ham_cycle = sql.Column('Hamiltonian cycle', sql.types.String())
+    g_edges = sql.Column('Graph Edges', sql.types.String())
+    avg_poly = sql.Column('Avg. polynomial', sql.types.FLOAT())
+    poly = sql.Column('Polynomial', sql.types.String())
+    sp = sql.Column('Spanning Trees', sql.INTEGER())
+    edge_conn = sql.Column('Edge connectivity', sql.INTEGER())
+    edge_cuts = sql.Column('Min. k=2 edge-cut', sql.INTEGER())
+    automorphisms = sql.Column('Automorphisms', sql.INTEGER())
+    diameter = sql.Column('Diameter', sql.INTEGER())
+    prob01 = sql.Column('Probability 0.1', sql.types.FLOAT())
+    prob02 = sql.Column('Probability 0.2', sql.types.FLOAT())
+    prob03 = sql.Column('Probability 0.3', sql.types.FLOAT())
+    prob04 = sql.Column('Probability 0.4', sql.types.FLOAT())
+    prob05 = sql.Column('Probability 0.5', sql.types.FLOAT())
+    prob06 = sql.Column('Probability 0.6', sql.types.FLOAT())
+    prob07 = sql.Column('Probability 0.7', sql.types.FLOAT())
+    prob08 = sql.Column('Probability 0.8', sql.types.FLOAT())
+    prob09 = sql.Column('Probability 0.9', sql.types.FLOAT())
 
 
 class GraphType(Enum):
@@ -603,8 +631,8 @@ class GraphTools(object):
             if binomial_format:
                 bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
 
-            edg = str(sorted(graph.edges()))
-            st_edg = str(edg)
+            test = nx.to_graph6_bytes(graph, nodes=None, header=False)
+            t2 = str(test)
 
 
             data = {'G6': nx.to_graph6_bytes(graph, nodes=None, header=False),
@@ -1937,109 +1965,75 @@ class GraphTools(object):
         return sympy.simplify(poly1), sympy.simplify(poly2), sympy.simplify(poly3)
 
 
-class DBinterface(object):
-    main_table = 'Graphs'
+class DButilities(object):
 
-    def __init__(self, db_name="Graphs_DB"):
-        self.db_name = db_name
-        # Establish a connection with the Data Base
-        self.engine = alchemy.create_engine('sqlite:///' + os.getcwd() + '/Data/DDBB/' + db_name + '.db', echo=False)
-        self.main_table = 'Graphs'
-        check = self.engine.has_table(self.main_table)
-        if not check:
-            self.create_main_table()
+    @staticmethod
+    def create_tables(engine, table_objects):
+        """
+        The create_all() function uses the engine object to create all the defined table objects
+        and stores the information in metadata.
+        :param engine: sqlalchemy engine
+        """
+        # if not engine.dialect.has_table(engine, 'Users'):  # If table don't exist, Create.
+        sql.MetaData().create_all(engine, tables=table_objects)
 
-    def create_main_table(self):
-        df = pd.DataFrame({'G6': [np.nan],
-                           'Graph': [np.nan],
-                           'Super Graph': [np.nan],
-                           'Hamiltonian': [np.nan],
-                           'Hamiltonian cycle': [np.nan],
-                           'Graph Edges': [np.nan],
-                           'Avg. polynomial': [np.nan],
-                           'Polynomial': [np.nan],
-                           'Spanning Trees': [np.nan],
-                           'Edge connectivity': [np.nan],
-                           'Min. k=2 edge-cut': [np.nan],
-                           'Automorphisms': [np.nan],
-                           'Diameter': [np.nan],
-                           'Probability 0.1': [np.nan],
-                           'Probability 0.2': [np.nan],
-                           'Probability 0.3': [np.nan],
-                           'Probability 0.4': [np.nan],
-                           'Probability 0.5': [np.nan],
-                           'Probability 0.6': [np.nan],
-                           'Probability 0.7': [np.nan],
-                           'Probability 0.8': [np.nan],
-                           'Probability 0.9': [np.nan]})
+    @staticmethod
+    def add_column(session, table_name, column_name, column_type):
+        session.execute('ALTER TABLE %s ADD COLUMN %s %s' % (table_name, column_name, column_type))
 
-        df.set_index('G6', inplace=True)
-        df.to_sql('Graphs', con=self.engine, index=False,
-                  dtype={'G6': alchemy.types.String(),
-                         'Graph': alchemy.types.String(),
-                         'Super Graph': alchemy.types.String(),
-                         'Hamiltonian': alchemy.types.BOOLEAN(),
-                         'Hamiltonian cycle': alchemy.types.String(),
-                         'Graph Edges': alchemy.types.String(),
-                         'Avg. polynomial': alchemy.types.FLOAT(),
-                         'Polynomial': alchemy.types.String(),
-                         'Spanning Trees': alchemy.INTEGER(),
-                         'Edge connectivity': alchemy.INTEGER(),
-                         'Min. k=2 edge-cut': alchemy.INTEGER(),
-                         'Automorphisms': alchemy.INTEGER(),
-                         'Diameter': alchemy.INTEGER(),
-                         'Probability 0.1': alchemy.types.FLOAT(),
-                         'Probability 0.2': alchemy.types.FLOAT(),
-                         'Probability 0.3': alchemy.types.FLOAT(),
-                         'Probability 0.4': alchemy.types.FLOAT(),
-                         'Probability 0.5': alchemy.types.FLOAT(),
-                         'Probability 0.6': alchemy.types.FLOAT(),
-                         'Probability 0.7': alchemy.types.FLOAT(),
-                         'Probability 0.8': alchemy.types.FLOAT(),
-                         'Probability 0.9': alchemy.types.FLOAT()})
+    @staticmethod
+    def bulk_insert(session, df, object):
+        session.bulk_insert_mappings(object, df.to_dict(orient="records"))
+        session.commit()
 
-    def add_columns(self, cols, table_name=main_table):
-        df = self.get_table(table_name)
-        pd.concat([df, pd.DataFrame(columns=cols)])
+    @staticmethod
+    def add_or_update(session, df, object):
+        graphs = DButilities.df_to_object(df, object)
+        primary_key = sql.inspect(object).primary_key[0].name
 
-    def write_df(self, df, table_name=main_table):
-        df.to_sql(table_name, con=self.engine, if_exists='append',
-                  dtype={'G6': alchemy.types.String(),
-                         'Graph': alchemy.types.String(),
-                         'Super Graph': alchemy.types.String(),
-                         'Hamiltonian': alchemy.types.BOOLEAN(),
-                         'Hamiltonian cycle': alchemy.types.String(),
-                         'Graph Edges': alchemy.types.String(),
-                         'Avg. polynomial': alchemy.types.FLOAT(),
-                         'Polynomial': alchemy.types.String(),
-                         'Spanning Trees': alchemy.INTEGER(),
-                         'Edge connectivity': alchemy.INTEGER(),
-                         'Min. k=2 edge-cut': alchemy.INTEGER(),
-                         'Automorphisms': alchemy.INTEGER(),
-                         'Diameter': alchemy.INTEGER(),
-                         'Probability 0.1': alchemy.types.FLOAT(),
-                         'Probability 0.2': alchemy.types.FLOAT(),
-                         'Probability 0.3': alchemy.types.FLOAT(),
-                         'Probability 0.4': alchemy.types.FLOAT(),
-                         'Probability 0.5': alchemy.types.FLOAT(),
-                         'Probability 0.6': alchemy.types.FLOAT(),
-                         'Probability 0.7': alchemy.types.FLOAT(),
-                         'Probability 0.8': alchemy.types.FLOAT(),
-                         'Probability 0.9': alchemy.types.FLOAT()}
+        for element in graphs:
+            # Returns filter query
+            qry = session.query(object).filter(object.case == element.case)
+            # If qry.one(), then returns the filtered object
+
+            if qry.count():
+                # It exists already
+                session.merge(element)
+            else:
+                # It doesn't exist yet
+                session.add(element)
+        session.commit()
+
+    @staticmethod
+    def df_to_object(df, object):
+        return df.to_dict(orient="records", into=object)
+
+    @staticmethod
+    def write_df(engine, df, table_name):
+        df.to_sql(table_name, con=engine, if_exists='append', index=False,
+                  dtype={'G6': sql.types.String(),
+                         'Graph': sql.types.String(),
+                         'Super Graph': sql.types.String(),
+                         'Hamiltonian': sql.types.BOOLEAN(),
+                         'Hamiltonian cycle': sql.types.String(),
+                         'Graph Edges': sql.types.String(),
+                         'Avg. polynomial': sql.types.FLOAT(),
+                         'Polynomial': sql.types.String(),
+                         'Spanning Trees': sql.INTEGER(),
+                         'Edge connectivity': sql.INTEGER(),
+                         'Min. k=2 edge-cut': sql.INTEGER(),
+                         'Automorphisms': sql.INTEGER(),
+                         'Diameter': sql.INTEGER(),
+                         'Probability 0.1': sql.types.FLOAT(),
+                         'Probability 0.2': sql.types.FLOAT(),
+                         'Probability 0.3': sql.types.FLOAT(),
+                         'Probability 0.4': sql.types.FLOAT(),
+                         'Probability 0.5': sql.types.FLOAT(),
+                         'Probability 0.6': sql.types.FLOAT(),
+                         'Probability 0.7': sql.types.FLOAT(),
+                         'Probability 0.8': sql.types.FLOAT(),
+                         'Probability 0.9': sql.types.FLOAT()}
                   )
-
-    def get_table(self, table_name=main_table):
-        return pd.read_sql_table(table_name, 'sqlite:///' + os.getcwd() + '/Data/DDBB/' + self.db_name + '.db')
-
-    def read_graph(self, graph_id):
-        return pd.read_sql_query()  # TODO: Finish
-
-    def get_engine(self):
-        """
-        Getter for the 'engine' (connection to the data base)
-        :return: <engine> from the library sqlalchemy
-        """
-        return (self.engine)
 
 
 class GraphRel(object):
