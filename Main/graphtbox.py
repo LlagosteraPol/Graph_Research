@@ -17,35 +17,35 @@ from collections import defaultdict
 import glob
 import time
 import sqlalchemy as sql
-from sqlalchemy import orm
-import pandas as pd
 from sqlalchemy.ext.declarative import declarative_base
+import pandas as pd
+import types
 
-
-class Data_Graph(declarative_base()):
+Base = declarative_base()
+class Table_Graph(Base):
     __tablename__ = 'Graphs'
-    g6 = sql.Column('G6', sql.types.String(), primary_key=True)
-    name =sql.Column('Graph', sql.types.String())
-    sp_name = sql.Column('Super Graph', sql.types.String())
-    hamiltonian = sql.Column('Hamiltonian', sql.types.BOOLEAN())
-    ham_cycle = sql.Column('Hamiltonian cycle', sql.types.String())
-    g_edges = sql.Column('Graph Edges', sql.types.String())
-    avg_poly = sql.Column('Avg. polynomial', sql.types.FLOAT())
-    poly = sql.Column('Polynomial', sql.types.String())
-    sp = sql.Column('Spanning Trees', sql.INTEGER())
-    edge_conn = sql.Column('Edge connectivity', sql.INTEGER())
-    edge_cuts = sql.Column('Min. k=2 edge-cut', sql.INTEGER())
-    automorphisms = sql.Column('Automorphisms', sql.INTEGER())
-    diameter = sql.Column('Diameter', sql.INTEGER())
-    prob01 = sql.Column('Probability 0.1', sql.types.FLOAT())
-    prob02 = sql.Column('Probability 0.2', sql.types.FLOAT())
-    prob03 = sql.Column('Probability 0.3', sql.types.FLOAT())
-    prob04 = sql.Column('Probability 0.4', sql.types.FLOAT())
-    prob05 = sql.Column('Probability 0.5', sql.types.FLOAT())
-    prob06 = sql.Column('Probability 0.6', sql.types.FLOAT())
-    prob07 = sql.Column('Probability 0.7', sql.types.FLOAT())
-    prob08 = sql.Column('Probability 0.8', sql.types.FLOAT())
-    prob09 = sql.Column('Probability 0.9', sql.types.FLOAT())
+    g6_id = sql.Column(sql.types.String(), primary_key=True)
+    nodes = sql.Column(sql.types.INTEGER)
+    edges = sql.Column(sql.types.String)
+    hamiltonian = sql.Column(sql.types.BOOLEAN)
+    hamiltonian_cycle = sql.Column(sql.types.String)
+    graph_edges = sql.Column(sql.types.String)
+    avg_polynomial = sql.Column(sql.types.FLOAT)
+    polynomial = sql.Column(sql.types.String)
+    spanning_trees = sql.Column(sql.INTEGER)
+    edge_connectivity = sql.Column(sql.INTEGER)
+    min_k2_edge_cuts = sql.Column(sql.INTEGER)
+    automorphisms = sql.Column(sql.INTEGER)
+    diameter = sql.Column(sql.INTEGER)
+    probability_01 = sql.Column(sql.types.FLOAT)
+    probability_02 = sql.Column(sql.types.FLOAT)
+    probability_03 = sql.Column(sql.types.FLOAT)
+    probability_04 = sql.Column(sql.types.FLOAT)
+    probability_05 = sql.Column(sql.types.FLOAT)
+    probability_06 = sql.Column(sql.types.FLOAT)
+    probability_07 = sql.Column(sql.types.FLOAT)
+    probability_08 = sql.Column(sql.types.FLOAT)
+    probability_09 = sql.Column(sql.types.FLOAT)
 
 
 class GraphType(Enum):
@@ -302,6 +302,9 @@ class Utilities(object):
         :return: Binomial Polynomial, coefficients
         """
         p = sympy.symbols('p')
+
+        # Assuring that the given polynomial is in the right class
+        polynomial = sympy.poly(polynomial) #TODO: Improve this line
 
         binomial = 0
         degree = sympy.degree(polynomial, p)
@@ -600,65 +603,57 @@ class GraphTools(object):
             AdjMaBox.write_matrix(r_graph, path + graph_id)
 
     @staticmethod
-    def data_analysis(graph, binomial_format=False, fast=False, l_prev_graph=None):
+    def data_analysis(graph, binomial_format=False, fast=False):
         p = sympy.symbols("p")
         ham_cycle = GraphTools.hamilton_cycle(graph)
 
         if fast:
-            data = {'G6': nx.to_graph6_bytes(graph, nodes=None, header=False),
-                    'Graph': "Graph_n" + str(len(graph.nodes)) + "_e" + str(len(graph.edges)),
-                    'Hamiltonian': False if ham_cycle is None else True,
-                    'Hamiltonian cycle': ham_cycle,
-                    'Graph Edges': sorted(graph.edges()),
-                    'Spanning Trees': GraphTools.spanning_trees_count(graph),
-                    'Edge connectivity': nx.edge_connectivity(graph),
-                    'Min. k=2 edge-cut': len(GraphTools.minimum_k_edges_cutsets(graph, 2)),
-                    'Automorphisms': GraphTools.automorphism_group_number(graph),
-                    'Diameter': nx.diameter(graph)}
+            d = {'g6_id': nx.to_graph6_bytes(graph, nodes=None, header=False),
+                 'nodes': str(len(graph.nodes)),
+                 'edges': str(len(graph.edges)),
+                 'hamiltonian': False if ham_cycle is None else True,
+                 'hamiltonian_cycle': ham_cycle,
+                 'graph_edges': sorted(graph.edges()),
+                 'spanning_trees': GraphTools.spanning_trees_count(graph),
+                 'edge_connectivity': nx.edge_connectivity(graph),
+                 'min_k2_edge_cut': len(GraphTools.minimum_k_edges_cutsets(graph, 2)),
+                 'automorphisms': GraphTools.automorphism_group_number(graph),
+                 'diameter': nx.diameter(graph)}
 
         else:
 
             poly = GraphRel.relpoly_binary_improved(graph, 0)
 
-            is_sub_graph = False
-            if type(l_prev_graph) is list:
-                for prev_graph in l_prev_graph:
-                    if GraphTools.check_one_edge_less_subgraph_isomorphism(graph, prev_graph):
-                        is_sub_graph = True
-                        break
-
             bin_poly = None
             if binomial_format:
                 bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
 
-            test = nx.to_graph6_bytes(graph, nodes=None, header=False)
-            t2 = str(test)
+            d = {'g6_id': nx.to_graph6_bytes(graph, nodes=None, header=False),
+                 'nodes': str(len(graph.nodes)),
+                 'edges': str(len(graph.edges)),
+                 'hamiltonian': False if ham_cycle is None else True,
+                 'hamiltonian_cycle': str(ham_cycle),
+                 'graph_edges': str(sorted(graph.edges())),
+                 'avg_polynomial': sympy.integrate(poly.as_expr(), (p, 0, 1)),
+                 'polynomial': str(bin_poly) if binomial_format else str(poly),
+                 'spanning_trees': GraphTools.spanning_trees_count(graph),
+                 'edge_connectivity': nx.edge_connectivity(graph),
+                 'min_k2_edge_cuts': len(GraphTools.minimum_k_edges_cutsets(graph, 2)),
+                 'automorphisms': GraphTools.automorphism_group_number(graph),
+                 'diameter': nx.diameter(graph),
+                 'probability_01': poly.subs({p: 0.1}),
+                 'probability_02': poly.subs({p: 0.2}),
+                 'probability_03': poly.subs({p: 0.3}),
+                 'probability_04': poly.subs({p: 0.4}),
+                 'probability_05': poly.subs({p: 0.5}),
+                 'probability_06': poly.subs({p: 0.6}),
+                 'probability_07': poly.subs({p: 0.7}),
+                 'probability_08': poly.subs({p: 0.8}),
+                 'probability_09': poly.subs({p: 0.9})}
 
-
-            data = {'G6': nx.to_graph6_bytes(graph, nodes=None, header=False),
-                    'Graph': "Graph_n" + str(len(graph.nodes)) + "_e" + str(len(graph.edges)),
-                    'Super Graph': is_sub_graph if type(l_prev_graph) is list else "--",
-                    'Hamiltonian': False if ham_cycle is None else True,
-                    'Hamiltonian cycle': str(ham_cycle),
-                    'Graph Edges': str(sorted(graph.edges())),
-                    'Avg. polynomial': sympy.integrate(poly.as_expr(), (p, 0, 1)),
-                    'Polynomial': str(bin_poly) if binomial_format else str(poly),
-                    'Spanning Trees': GraphTools.spanning_trees_count(graph),
-                    'Edge connectivity': nx.edge_connectivity(graph),
-                    'Min. k=2 edge-cut': len(GraphTools.minimum_k_edges_cutsets(graph, 2)),
-                    'Automorphisms': GraphTools.automorphism_group_number(graph),
-                    'Diameter': nx.diameter(graph),
-                    'Probability 0.1': poly.subs({p: 0.1}),
-                    'Probability 0.2': poly.subs({p: 0.2}),
-                    'Probability 0.3': poly.subs({p: 0.3}),
-                    'Probability 0.4': poly.subs({p: 0.4}),
-                    'Probability 0.5': poly.subs({p: 0.5}),
-                    'Probability 0.6': poly.subs({p: 0.6}),
-                    'Probability 0.7': poly.subs({p: 0.7}),
-                    'Probability 0.8': poly.subs({p: 0.8}),
-                    'Probability 0.9': poly.subs({p: 0.9})}
-
-        return pd.DataFrame(data, index=[0])
+        df = pd.DataFrame(data=d, index=[0])
+        df.set_index('g6_id', inplace=True)
+        return df
 
     @staticmethod
     def data_print(data, write_fomat, path):
@@ -676,8 +671,11 @@ class GraphTools(object):
             data.to_excel(path + ".xml")
 
         elif write_fomat == FormatType.SQL:
-            db = DBinterface()
-            db.write_df(data)
+            engine = sql.create_engine('sqlite:///' + path + ".db", echo=False)
+            Session = sql.orm.session.sessionmaker(bind=engine)
+            session = Session()
+            DButilities.add_or_update(session, data, Table_Graph)
+            session.close()
 
     @staticmethod
     def data_read(read_format, path):
@@ -1118,6 +1116,47 @@ class GraphTools(object):
                 else:
                     print("\n File ", file_name, ".g6 not found.")
 
+        print("\nDone")
+
+    @staticmethod
+    def g6_files_data_analysis(n_min, n_max, complete=False, binomial_format=True, fast=False):
+        """
+        This method will check different properties of graphs from n_min to n_max vertices with n/2 edges or up to
+        complete graph if indicated. All the results will be written into a .txt file that could be easily converted to
+        a calc sheet.
+        :param n_min: minimum nodes
+        :param n_max: maximum nodes
+        :param complete: boolean that indicates if the number of edges is to complete graph or otherwise n/2
+        :param cross_points: check if the polynomials of the graphs crosses another graph
+        """
+        path = os.getcwd() + "/Data/Graph6/"
+
+        for nodes in range(n_min, n_max + 1):
+            # Complete graph
+            if complete:
+                edges = int(nodes * (nodes - 1) / 2)
+
+            # Gives -> nodes/2 <- chords
+            else:
+                edges = int(nodes / 2 + nodes)
+
+            data_frames = list()
+            for i in range(nodes, edges + 1):
+                file_name = "Graph_n" + str(nodes) + "_e" + str(i)
+                if os.path.isfile(path + file_name + ".g6"):
+                    print("\nAnalyzing file: ", file_name)
+                    g_list = nx.read_graph6(path + file_name + ".g6")
+                    #TODO: Improve efficiency
+                    for g in g_list:
+                        data_frames.append(GraphTools.data_analysis(g, binomial_format, fast))
+                    print("\nAnalyzed")
+
+                else:
+                    print("\n File ", file_name, ".g6 not found.")
+
+            for df in data_frames:
+                #TODO: Maybe input write format
+                GraphTools.data_print(df, FormatType.SQL,  os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
         print("\nDone")
 
     @staticmethod
@@ -1968,48 +2007,80 @@ class GraphTools(object):
 class DButilities(object):
 
     @staticmethod
-    def create_tables(engine, table_objects):
+    def read_table(session, table, column='*', conditions=None):
+        if conditions:
+            query = "SELECT " + column + " FROM " + table + " WHERE " + conditions
+
+        else:
+            query = "SELECT " + column + " FROM " + table
+
+        return pd.read_sql_query(query, session)
+
+    @staticmethod
+    def create_table(engine, table):
         """
         The create_all() function uses the engine object to create all the defined table objects
         and stores the information in metadata.
         :param engine: sqlalchemy engine
         """
-        # if not engine.dialect.has_table(engine, 'Users'):  # If table don't exist, Create.
-        sql.MetaData().create_all(engine, tables=table_objects)
+        if not engine.dialect.has_table(engine, table.__tablename__):  # If table don't exist, Create.
+            table.__table__.create(bind=engine)
 
     @staticmethod
     def add_column(session, table_name, column_name, column_type):
         session.execute('ALTER TABLE %s ADD COLUMN %s %s' % (table_name, column_name, column_type))
 
     @staticmethod
-    def bulk_insert(session, df, object):
-        session.bulk_insert_mappings(object, df.to_dict(orient="records"))
+    def bulk_insert(session, df, obj):
+        session.bulk_insert_mappings(obj, df.to_dict(orient="records"))
         session.commit()
 
     @staticmethod
-    def add_or_update(session, df, object):
-        graphs = DButilities.df_to_object(df, object)
-        primary_key = sql.inspect(object).primary_key[0].name
+    def bulk_update(session, df, obj):
+        session.bulk_update_mappings(obj, df.to_dict(orient="records"))
+        session.commit()
 
-        for element in graphs:
+    @staticmethod
+    def add_or_update(session, df, obj):
+        graphs = DButilities.df_to_objects(df)
+        primary_key = sql.inspect(obj).primary_key[0].name
+
+        # Create table if not created
+        DButilities.create_table(session.get_bind(), obj)
+
+        data_update = []
+        data_insert = []
+        for key, values in graphs:
             # Returns filter query
-            qry = session.query(object).filter(object.case == element.case)
+            qry = session.query(obj).filter(getattr(obj, primary_key) == key)
             # If qry.one(), then returns the filtered object
+            tmp = vars(values)
+            tmp[primary_key] = key
 
+            # It exists already
             if qry.count():
-                # It exists already
-                session.merge(element)
+                # session.merge(element)  # This will update one by one
+                data_update.append(vars(values))
+
+            # It doesn't exist yet
             else:
-                # It doesn't exist yet
-                session.add(element)
+                # session.add(element)  # This will add one by one
+                data_insert.append(vars(values))
+
+        # With the filtered data make bulk updates and inserts
+        session.bulk_update_mappings(obj, data_update)
+        session.bulk_insert_mappings(obj, data_insert)
         session.commit()
 
     @staticmethod
-    def df_to_object(df, object):
-        return df.to_dict(orient="records", into=object)
+    def df_to_objects(df):
+        obj_lst = list()
+        for key, values in df.to_dict(orient="index").items():
+            obj_lst.append((key.decode("utf-8") , types.SimpleNamespace(**values)))
+        return obj_lst
 
     @staticmethod
-    def write_df(engine, df, table_name):
+    def write_graphs_df(engine, df, table_name):
         df.to_sql(table_name, con=engine, if_exists='append', index=False,
                   dtype={'G6': sql.types.String(),
                          'Graph': sql.types.String(),

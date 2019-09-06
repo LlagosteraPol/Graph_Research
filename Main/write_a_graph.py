@@ -1315,7 +1315,7 @@ for i in range(8, 35, 6):
 #hams = GraphTools.gen_all_hamiltonian(10, 20)
 
 #Benchmarks.relpoly_binary_improved_console_benchmark(hams, 100)
-
+"""
 n7e12 = nx.Graph([(0, 3), (0, 4), (0, 5), (0, 6), (1, 3), (1, 4), (1, 5), (1, 6), (2, 4), (2, 5), (2, 6), (3, 6)]
 )
 n8e12 = nx.Graph([(0, 3), (0, 4), (0, 5), (1, 4), (1, 5), (1, 6), (2, 5), (2, 6), (2, 7), (3, 6), (3, 7), (4, 7)]
@@ -1340,3 +1340,8 @@ for element in connections.values():
     n_g.append(len(element))
 time_elapsed = (time.process_time() - time_start)
 print("Connected components: ", time_elapsed)
+"""
+
+g_list, file_name = Utilities.input_g6_file("Enter the name of the .g6 file.")
+df = GraphTools.data_analysis(g_list[0], True, fast)
+GraphTools.data_print(df, write_format, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")

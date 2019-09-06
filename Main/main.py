@@ -235,6 +235,19 @@ class Switcher(object):
         GraphTools.data_print(df, FormatType.HTML, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
         #GraphTools.data_print(df, FormatType.Excel, os.getcwd() + "/Data/DDBB/" + "DB_file_name")
         """
+
+    def option_g6_files_data_analysis(self):
+        print("This option will analyze the graphs in .g6 format within the range of 'n' nodes (minimum-maximum), "
+              "and depending of the selected option; 'e' edges (n to n/2) or (n to complete graph) and save the results"
+              "into a SQLite data base called 'Graphs_DB'")
+        n_min = int(Utilities.input_number("Input minimum nodes:\n"))
+        n_max = int(Utilities.input_number("Input maximum nodes:\n"))
+
+        complete = Utilities.ask_yes_no("Analyze the graphs with edges at the range (n to complete graph)?")
+
+        GraphTools.g6_files_data_analysis(n_min, n_max, complete)
+
+
 # ----------------------------------------------------USER INTERFACE----------------------------------------------------
 
 sw = Switcher()
@@ -293,7 +306,7 @@ while True:
         sw.option_compare_coefficients()
 
     elif option == 12:
-        sw.option_testing()
+        sw.option_g6_files_data_analysis()
 
     elif option == 0:
         break
