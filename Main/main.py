@@ -243,9 +243,14 @@ class Switcher(object):
         n_min = int(Utilities.input_number("Input minimum nodes:\n"))
         n_max = int(Utilities.input_number("Input maximum nodes:\n"))
 
-        complete = Utilities.ask_yes_no("Analyze the graphs with edges at the range (n to complete graph)?")
+        #complete = Utilities.ask_yes_no("Analyze the graphs with edges at the range (n to complete graph)?")
+        chords = int(Utilities.input_number("Input maximum number of chords, or 0 for complete graph:\n"))
 
-        GraphTools.g6_files_data_analysis(n_min, n_max, complete)
+        time_start = time.process_time()
+        GraphTools.g6_files_data_analysis(n_min, n_max, chords)
+        time_elapsed = (time.process_time() - time_start)
+        print("\nTime: ", time_elapsed)
+
 
 
 # ----------------------------------------------------USER INTERFACE----------------------------------------------------

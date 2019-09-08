@@ -24,7 +24,7 @@ import types
 Base = declarative_base()
 class Table_Graph(Base):
     __tablename__ = 'Graphs'
-    g6_id = sql.Column(sql.types.String(), primary_key=True)
+    g6_id = sql.Column(sql.types.String(), primary_key=True, index=True) # TODO: Check index
     nodes = sql.Column(sql.types.INTEGER)
     edges = sql.Column(sql.types.String)
     hamiltonian = sql.Column(sql.types.BOOLEAN)
@@ -304,7 +304,8 @@ class Utilities(object):
         p = sympy.symbols('p')
 
         # Assuring that the given polynomial is in the right class
-        polynomial = sympy.poly(polynomial) #TODO: Improve this line
+        if type(polynomial) is not sympy.polys.polytools.Poly:
+            polynomial = sympy.poly(polynomial)
 
         binomial = 0
         degree = sympy.degree(polynomial, p)
@@ -1119,7 +1120,7 @@ class GraphTools(object):
         print("\nDone")
 
     @staticmethod
-    def g6_files_data_analysis(n_min, n_max, complete=False, binomial_format=True, fast=False):
+    def g6_files_data_analysis(n_min, n_max, max_chords=0, binomial_format=True, fast=False):
         """
         This method will check different properties of graphs from n_min to n_max vertices with n/2 edges or up to
         complete graph if indicated. All the results will be written into a .txt file that could be easily converted to
@@ -1133,12 +1134,12 @@ class GraphTools(object):
 
         for nodes in range(n_min, n_max + 1):
             # Complete graph
-            if complete:
+            if max_chords == 0:
                 edges = int(nodes * (nodes - 1) / 2)
 
             # Gives -> nodes/2 <- chords
             else:
-                edges = int(nodes / 2 + nodes)
+                edges = max_chords + nodes
 
             data_frames = list()
             for i in range(nodes, edges + 1):
@@ -2119,7 +2120,8 @@ class GraphRel(object):
         h = nx.MultiGraph(g)
         rel = GraphRel.__recursive_basic(h)
 
-        return sympy.simplify(rel)
+        #return sympy.simplify(rel)
+        return rel
 
     @classmethod
     def __recursive_basic(cls, g):
@@ -2158,7 +2160,7 @@ class GraphRel(object):
         rel = GraphRel.__recursive_improved(nx.MultiGraph(g), filter_depth)
         # rel = GraphRel._recursive_improved_old(nx.MultiGraph(g))
 
-        return sympy.simplify(rel)
+        return rel
 
     @classmethod
     def __recursive_improved(cls, g, filter_depth):
