@@ -225,12 +225,14 @@ class Switcher(object):
             dfs = None
             for ham in hamiltonians:
                 df = GraphTools.data_analysis(ham, True)
+                GraphTools.data_print(df, FormatType.SQL, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
+                """
                 if dfs is None:
                     dfs = df
                 else:
                     dfs = dfs.append(df)
-                    
-            GraphTools.data_print(dfs, FormatType.SQL, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
+                    """
+
             print("Analyzed")
 
 
