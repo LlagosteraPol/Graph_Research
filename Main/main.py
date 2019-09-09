@@ -212,6 +212,28 @@ class Switcher(object):
 
         GraphTools.compare_graphs("Coef" + graph1[1], graph1[0][0], filtered_ham, False, True)
 
+    def option_gen_all_3ch_hamiltonian_opt(self):
+        print("This option will analyze hamiltonian graphs with a maximum of 3 chords. At least one of the chords will"
+              "be diametrical and the other 2 will cross it.")
+
+        n_min = int(Utilities.input_number("Input minimum nodes:\n"))
+        n_max = int(Utilities.input_number("Input maximum nodes:\n"))
+
+        for n in range(n_min, n_max+1):
+            hamiltonians = GraphTools.gen_all_3ch_hamiltonian_opt(n)
+            print("\nAnalyzing ", len(hamiltonians),"hamiltonian graphs with: ", len(hamiltonians[-1].nodes()), "nodes")
+            dfs = None
+            for ham in hamiltonians:
+                df = GraphTools.data_analysis(ham, True)
+                if dfs is None:
+                    dfs = df
+                else:
+                    dfs = dfs.append(df)
+                    
+            GraphTools.data_print(dfs, FormatType.SQL, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
+            print("Analyzed")
+
+
     def option_testing(self):
         print("This option will the analyze graphs inside a .g6 file and print the results in the desired format.")
 
@@ -274,7 +296,9 @@ while True:
          "10) Compare the best Reliability Polynomial between General and Hamiltonian graphs on a range of graphs.\n"
          "11) Compare the coefficients of one graph with the ones of a bunch of graphs.\n"
          
-         "12) Testing: Analysis and print data.\n"
+         "12) Analyze 3 chords hamiltonian graphs.\n"
+         
+         "13) Testing: Analysis and print data.\n"
          "0) Exit.\n")
 
     if option == 1:
@@ -311,6 +335,9 @@ while True:
         sw.option_compare_coefficients()
 
     elif option == 12:
+        sw.option_gen_all_3ch_hamiltonian_opt()
+
+    elif option == 13:
         sw.option_g6_files_data_analysis()
 
     elif option == 0:
