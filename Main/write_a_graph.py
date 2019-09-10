@@ -1341,7 +1341,25 @@ for element in connections.values():
 time_elapsed = (time.process_time() - time_start)
 print("Connected components: ", time_elapsed)
 """
+"""
+check1 = nx.Graph([(0, 5), (0, 9), (1, 6), (1, 7), (1, 10), (2, 6), (2, 8), (2, 9), (3, 7), (3, 9), (4, 8), (4, 10), (5, 10)])
+check2 = nx.Graph([(0, 5), (0, 6), (0, 10), (1, 6), (1, 7), (2, 7), (2, 8), (3, 8), (3, 9), (4, 9), (4, 10), (5, 10), (6, 10)])
 
-g_list, file_name = Utilities.input_g6_file("Enter the name of the .g6 file.")
-df = GraphTools.data_analysis(g_list[0], True, fast)
-GraphTools.data_print(df, write_format, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
+check3 = nx.Graph([(0, 6), (0, 9), (1, 7), (1, 8), (2, 7), (2, 9), (3, 7), (3, 10), (4, 8), (4, 9), (5, 8), (5, 10), (6, 10)])
+check4 = nx.Graph([(0, 8), (0, 9), (0, 10), (1, 10), (2, 10), (3, 10), (4, 10), (5, 10), (6, 10), (7, 10), (8, 9), (8, 10), (9, 10)])
+
+rel1 = GraphRel.relpoly_binary_improved(check1)
+print("H_B: ", Utilities.polynomial2binomial(rel1))
+
+rel2 = GraphRel.relpoly_binary_improved(check2)
+print("H_W: ", Utilities.polynomial2binomial(rel2))
+
+rel3 = GraphRel.relpoly_binary_improved(check3)
+print("G_B: ", Utilities.polynomial2binomial(rel3))
+
+rel4 = GraphRel.relpoly_binary_improved(check4)
+print("G_W: ", Utilities.polynomial2binomial(rel4))
+"""
+out_path = os.getcwd() + "/Data/Results/"
+for n in range(12, 13):
+    GraphTools.gen_all_3ch_hamiltonian_opt(n, out_path)

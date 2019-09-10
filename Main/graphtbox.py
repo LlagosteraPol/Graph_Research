@@ -627,7 +627,10 @@ class GraphTools(object):
 
             bin_poly = None
             if binomial_format:
-                bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
+                try:
+                    bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
+                except:
+                    print("Something happened")
 
             d = {'g6_id': nx.to_graph6_bytes(graph, nodes=None, header=False),
                  'nodes': str(len(graph.nodes)),
@@ -1309,12 +1312,14 @@ class GraphTools(object):
         return ham_graphs
 
     @staticmethod
-    def gen_all_3ch_hamiltonian_opt(n_nodes):
+    def gen_all_3ch_hamiltonian_opt(n_nodes, out_path=None):
         """
         Generate all possible Hamiltonian graphs with the given nodes and chords. The method is Optimized,
         this means, compute the first chord (diagonal), chords of length more than n/2 and maximum grade = 3
         :param n_nodes: Number of nodes of the Hamiltonian graphs
-        :return: All the possible Hamiltonian graphs
+        :param out_path: Optional, path for writing the generated graphs in g6 format
+        :return: All the possible Hamiltonian graphs or if out_path is given, a file containing a g6
+        format of the graphs
         """
         cycle = nx.cycle_graph(n_nodes)
 
@@ -1354,7 +1359,10 @@ class GraphTools(object):
 
                         ham_graphs.append(new_graph)
 
-        return ham_graphs
+        if out_path is None:
+            return GraphTools.filter_isomorphisms(ham_graphs)
+        else:
+            GraphTools.filter_isomorphisms(ham_graphs, out_path)
 
     @staticmethod
     def filter_uniformly_most_reliable_graph(g_list):
@@ -1438,6 +1446,43 @@ class GraphTools(object):
             return filtered_ham, filtered_others
 
         return hamiltonians, others
+
+    @staticmethod
+    def filter_isomorphisms(g_list, out_path=None):
+        path = os.getcwd() + "/Data/tmp/"
+        file_name = "tmp_data"
+
+        # Create a file containing the graphs in g6 format
+        for g in g_list:
+            g6 = nx.to_graph6_bytes(g, nodes=None, header=False).decode("utf-8")
+            print(g6, file=open(path + file_name + ".g6", "a"), end='')
+
+        print("Total:", len(g_list))
+
+        # Filter by isomorphism
+        if out_path is None:
+            out_file = path + file_name + "filtered.g6"
+            command = "nauty-shortg " + path + file_name + ".g6 " + out_file
+            os.system(command)
+
+            # Read the file with the filtered graphs
+            if os.path.isfile(path + file_name + "filtered" + ".g6"):
+                fg_list = nx.read_graph6(path + file_name + "filtered" + ".g6")
+                print("Filtered:", len(fg_list))
+
+            # Remove temporal files
+            os.remove(path + file_name + ".g6")
+            os.remove(path + file_name + "filtered" + ".g6")
+            return fg_list
+
+        else:
+            out_file = out_path + "Diametral_n" + str(len(g_list[-1].nodes)) + "_ch3.g6"
+            if os.path.isfile(out_file):
+                os.remove(out_file)
+
+            command = "nauty-shortg " + path + file_name + ".g6 " + out_file
+            os.system(command)
+            os.remove(path + file_name + ".g6")
 
     @staticmethod
     def spanning_trees_count(g):
