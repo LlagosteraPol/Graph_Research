@@ -220,19 +220,18 @@ class Switcher(object):
         n_max = int(Utilities.input_number("Input maximum nodes:\n"))
 
         for n in range(n_min, n_max+1):
-            hamiltonians = GraphTools.gen_all_3ch_hamiltonian_opt(n)
-            print("\nAnalyzing ", len(hamiltonians),"hamiltonian graphs with: ", len(hamiltonians[-1].nodes()), "nodes")
+            #hamiltonians = GraphTools.gen_all_3ch_hamiltonian_opt(n)
+            hamiltonians = nx.read_graph6(os.getcwd() + "/Data/Graph6/Diametral_n" + str(n) + "_ch3.g6")
+            print("\nAnalyzing ", len(hamiltonians),"hamiltonian graphs with: ", n, "nodes")
             dfs = None
-
             for ham in hamiltonians:
-                df = GraphTools.data_analysis(ham, True)
+                df = GraphTools.data_analysis(ham, False)
                 if dfs is None:
                     dfs = df
                 else:
                     dfs = dfs.append(df)
 
             GraphTools.data_print(dfs, FormatType.SQL, os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
-
 
             print("Analyzed")
 

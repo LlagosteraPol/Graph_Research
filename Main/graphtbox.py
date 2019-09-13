@@ -26,7 +26,7 @@ class Table_Graph(Base):
     __tablename__ = 'Graphs'
     g6_id = sql.Column(sql.types.String(), primary_key=True, index=True) # TODO: Check index
     nodes = sql.Column(sql.types.INTEGER)
-    edges = sql.Column(sql.types.String)
+    edges = sql.Column(sql.types.INTEGER)
     hamiltonian = sql.Column(sql.types.BOOLEAN)
     hamiltonian_cycle = sql.Column(sql.types.String)
     graph_edges = sql.Column(sql.types.String)
@@ -320,7 +320,11 @@ class Utilities(object):
         for i in range(1, n_coeff):
             coeff2expand = coefficients[-i]
             expanded = sympy.Poly(coeff2expand * p ** (aux_degree - n_coeff + 1) * (1 - p) ** (aux - 1))
-            tmp_coefficients = expanded.all_coeffs()
+            try:
+                tmp_coefficients = expanded.all_coeffs()
+            except:
+                print("Rel(g,p)= ",polynomial)
+                print("sympy.polys.polyerrors.PolynomialError: multivariate polynomials not supported")
             tmp_coefficients = np.trim_zeros(tmp_coefficients)
             tmp_n_coeff = len(tmp_coefficients)
 
@@ -627,10 +631,7 @@ class GraphTools(object):
 
             bin_poly = None
             if binomial_format:
-                try:
-                    bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
-                except:
-                    print("Something happened")
+                bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
 
             d = {'g6_id': nx.to_graph6_bytes(graph, nodes=None, header=False),
                  'nodes': str(len(graph.nodes)),

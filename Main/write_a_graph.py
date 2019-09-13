@@ -1360,6 +1360,6 @@ print("G_B: ", Utilities.polynomial2binomial(rel3))
 rel4 = GraphRel.relpoly_binary_improved(check4)
 print("G_W: ", Utilities.polynomial2binomial(rel4))
 """
-out_path = os.getcwd() + "/Data/Results/"
-for n in range(12, 13):
+out_path = os.getcwd() + "/Data/Graph6/"
+for n in range(12, 35):
     GraphTools.gen_all_3ch_hamiltonian_opt(n, out_path)
