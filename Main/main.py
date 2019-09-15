@@ -225,7 +225,7 @@ class Switcher(object):
             print("\nAnalyzing ", len(hamiltonians),"hamiltonian graphs with: ", n, "nodes")
             dfs = None
             for ham in hamiltonians:
-                df = GraphTools.data_analysis(ham, False)
+                df = GraphTools.data_analysis(ham, True)
                 if dfs is None:
                     dfs = df
                 else:

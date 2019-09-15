@@ -4,6 +4,7 @@ import networkx as nx
 from networkx.algorithms import isomorphism
 import sympy
 from sympy import roots
+from sympy.parsing.sympy_parser import parse_expr
 import matplotlib.pyplot as plt
 import itertools as itt
 import copy
@@ -310,7 +311,8 @@ class Utilities(object):
         binomial = 0
         degree = sympy.degree(polynomial, p)
 
-        coefficients = polynomial.all_coeffs()
+        # Get coefficients (and round the ones really close to 0)
+        coefficients = Utilities.refine_polynomial_coefficients(polynomial)
         coefficients = np.trim_zeros(coefficients)  # Delete all right zeroes
         n_coeff = len(coefficients)
 
@@ -341,6 +343,23 @@ class Utilities(object):
             aux_degree -= 1
 
         return binomial, coefficients
+
+    @staticmethod
+    def refine_polynomial_coefficients(polynomial):
+        """
+        This method will round the coefficients of the polynomial that are almost zero (ex. at the order of e-10).
+        When calculating Rel(G,p), if some of the coefficients are like this maybe is due to noise when calculating
+        large amounts reliabilities with big polynomials.
+        :param polynomial: polynomial to refine
+        :return: refined polynomial
+        """
+        coefficients = polynomial.all_coeffs()
+
+        refined_coefficients = list()
+        for coefficient in coefficients:
+            refined_coefficients.append(round(coefficient, 4))
+
+        return refined_coefficients
 
 
 class AdjMaBox(object):

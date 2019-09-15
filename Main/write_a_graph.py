@@ -1360,6 +1360,68 @@ print("G_B: ", Utilities.polynomial2binomial(rel3))
 rel4 = GraphRel.relpoly_binary_improved(check4)
 print("G_W: ", Utilities.polynomial2binomial(rel4))
 """
+"""
 out_path = os.getcwd() + "/Data/Graph6/"
 for n in range(12, 35):
     GraphTools.gen_all_3ch_hamiltonian_opt(n, out_path)
+"""
+
+
+
+
+pd1 = parse_expr("Poly(2668.0*p**28 - 11836.0*p**27 + 19732.0*p**26 - 14652.0*p**25 + 4089.0*p**24 + 2.8421709430404e-14*p**7 - "
+                 "1.4210854715202e-13*p**6 + 2.8421709430404e-13*p**5 - 2.8421709430404e-13*p**4 + 1.4210854715202e-13*p**3 - 2.8421709430404e-14*p**2, p, domain='RR')")
+
+pd2 = sympy.Poly(2668.0*p**28 - 11836.0*p**27 + 19732.0*p**26 - 14652.0*p**25 + 4089.0*p**24 + 2.8421709430404e-14*p**7 - 1.4210854715202e-13*p**6 + 2.8421709430404e-13*p**5 - 2.8421709430404e-13*p**4 + 1.4210854715202e-13*p**3 - 2.8421709430404e-14*p**2, p, domain='RR')
+
+
+test = sympy.Poly(2668.0*p**28 - 11836.0*p**27 + 19732.0*p**26 - 14652.0*p**25 + 4089.0*p**24, p, domain='RR')
+t, tt = Utilities.polynomial2binomial(test)
+print(t)
+pf1, nope = Utilities.polynomial2binomial(pd1)
+print(pf1)
+
+pd3 = sympy.poly(pf1)
+
+if pd3 == test:
+    print("True")
+
+else:
+    print("False")
+
+
+"""
+g6 = b'XPS?GH?_???O?C?A?G?@??A????????@C??I??DG?E????g?@?B'
+g = nx.from_graph6_bytes(g6)
+
+polynomial = GraphRel.relpoly_binary_improved(g, 0)
+
+print(polynomial)
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
