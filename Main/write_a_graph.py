@@ -480,6 +480,7 @@ for i in range(25, 31):
     for key, values in df.iterrows():
         polynomial = Utilities.polynomial2binomial(sympy.Poly(values['polynomial']))[0]
         df.set_value(key, 'polynomial', str(polynomial))
+    df.set_index('g6_id', inplace=True)
     DButilities.add_or_update(session, df, Table_Graph)
 
 """
@@ -496,7 +497,37 @@ session.close()
 
 
 
+"""
+test = pd.DataFrame({'g6_id': ['test'], 'nodes': [np.nan], 'edges': [np.nan], 'hamiltonian': [np.nan],
+                     'hamiltonian_cycle': [np.nan], 'graph_edges': [np.nan], 'avg_polynomial': [np.nan],
+                     'polynomial': [np.nan], 'spanning_trees': [np.nan], 'edge_connectivity': [np.nan],
+                     'min_k2_edge_cuts': [np.nan], 'automorphisms': [np.nan], 'diameter': [np.nan],
+                     'probability_01': [np.nan], 'probability_02': [np.nan], 'probability_02': [np.nan],
+                     'probability_03': [np.nan], 'probability_04': [np.nan], 'probability_05': [np.nan],
+                     'probability_06': [np.nan], 'probability_07': [np.nan], 'probability_08': [np.nan],
+                     'probability_09': [np.nan]})
+#test.set_index('g6_id')
 
+test2 = pd.DataFrame({'g6_id': ['test2'], 'nodes': [np.nan], 'edges': [np.nan], 'hamiltonian': [np.nan],
+                     'hamiltonian_cycle': [np.nan], 'graph_edges': [np.nan], 'avg_polynomial': [np.nan],
+                     'polynomial': [np.nan], 'spanning_trees': [np.nan], 'edge_connectivity': [np.nan],
+                     'min_k2_edge_cuts': [np.nan], 'automorphisms': [np.nan], 'diameter': [np.nan],
+                     'probability_01': [np.nan], 'probability_02': [np.nan], 'probability_02': [np.nan],
+                     'probability_03': [np.nan], 'probability_04': [np.nan], 'probability_05': [np.nan],
+                     'probability_06': [np.nan], 'probability_07': [np.nan], 'probability_08': [np.nan],
+                     'probability_09': [np.nan]})
+#test2.set_index('g6_id')
+
+tests = test.append(test2)
+tests.set_index('g6_id', inplace=True)
+
+test_dict = test.to_dict(orient="records")
+test_dict2 = test.to_dict(orient="index")
+
+tests_dict = tests.to_dict(orient="records")
+tests_dict2 = tests.to_dict(orient="index")
+DButilities.add_or_update(session, tests, Table_Graph)
+"""
 
 
 

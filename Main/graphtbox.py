@@ -2141,9 +2141,8 @@ class DButilities(object):
     @staticmethod
     def df_to_objects(df):
         obj_lst = list()
-        #for key, values in df.to_dict(orient="index").items():
-        for key, values in df.to_dict(orient="records").items():
-            obj_lst.append((key.decode("utf-8") , types.SimpleNamespace(**values)))
+        for key, values in df.to_dict(orient="index").items():
+            obj_lst.append((key.decode("utf-8") if type(key) is bytes else key, types.SimpleNamespace(**values)))
         return obj_lst
 
     @staticmethod
