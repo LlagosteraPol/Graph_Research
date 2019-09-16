@@ -17,7 +17,7 @@ from enum import Enum
 from collections import defaultdict
 import glob
 import time
-import sqlalchemy as sql
+import sqlalchemy as db
 from sqlalchemy.ext.declarative import declarative_base
 import pandas as pd
 import types
@@ -25,28 +25,28 @@ import types
 Base = declarative_base()
 class Table_Graph(Base):
     __tablename__ = 'Graphs'
-    g6_id = sql.Column(sql.types.String(), primary_key=True, index=True) # TODO: Check index
-    nodes = sql.Column(sql.types.INTEGER)
-    edges = sql.Column(sql.types.INTEGER)
-    hamiltonian = sql.Column(sql.types.BOOLEAN)
-    hamiltonian_cycle = sql.Column(sql.types.String)
-    graph_edges = sql.Column(sql.types.String)
-    avg_polynomial = sql.Column(sql.types.FLOAT)
-    polynomial = sql.Column(sql.types.String)
-    spanning_trees = sql.Column(sql.INTEGER)
-    edge_connectivity = sql.Column(sql.INTEGER)
-    min_k2_edge_cuts = sql.Column(sql.INTEGER)
-    automorphisms = sql.Column(sql.INTEGER)
-    diameter = sql.Column(sql.INTEGER)
-    probability_01 = sql.Column(sql.types.FLOAT)
-    probability_02 = sql.Column(sql.types.FLOAT)
-    probability_03 = sql.Column(sql.types.FLOAT)
-    probability_04 = sql.Column(sql.types.FLOAT)
-    probability_05 = sql.Column(sql.types.FLOAT)
-    probability_06 = sql.Column(sql.types.FLOAT)
-    probability_07 = sql.Column(sql.types.FLOAT)
-    probability_08 = sql.Column(sql.types.FLOAT)
-    probability_09 = sql.Column(sql.types.FLOAT)
+    g6_id = db.Column(db.types.String(), primary_key=True, index=True) # TODO: Check index
+    nodes = db.Column(db.types.INTEGER)
+    edges = db.Column(db.types.INTEGER)
+    hamiltonian = db.Column(db.types.BOOLEAN)
+    hamiltonian_cycle = db.Column(db.types.String)
+    graph_edges = db.Column(db.types.String)
+    avg_polynomial = db.Column(db.types.FLOAT)
+    polynomial = db.Column(db.types.String)
+    spanning_trees = db.Column(db.INTEGER)
+    edge_connectivity = db.Column(db.INTEGER)
+    min_k2_edge_cuts = db.Column(db.INTEGER)
+    automorphisms = db.Column(db.INTEGER)
+    diameter = db.Column(db.INTEGER)
+    probability_01 = db.Column(db.types.FLOAT)
+    probability_02 = db.Column(db.types.FLOAT)
+    probability_03 = db.Column(db.types.FLOAT)
+    probability_04 = db.Column(db.types.FLOAT)
+    probability_05 = db.Column(db.types.FLOAT)
+    probability_06 = db.Column(db.types.FLOAT)
+    probability_07 = db.Column(db.types.FLOAT)
+    probability_08 = db.Column(db.types.FLOAT)
+    probability_09 = db.Column(db.types.FLOAT)
 
 
 class GraphType(Enum):
@@ -695,8 +695,8 @@ class GraphTools(object):
             data.to_excel(path + ".xml")
 
         elif write_fomat == FormatType.SQL:
-            engine = sql.create_engine('sqlite:///' + path + ".db", echo=False)
-            Session = sql.orm.session.sessionmaker(bind=engine)
+            engine = db.create_engine('sqlite:///' + path + ".db", echo=False)
+            Session = db.orm.session.sessionmaker(bind=engine)
             session = Session()
             DButilities.add_or_update(session, data, Table_Graph)
             session.close()
@@ -2097,28 +2097,28 @@ class DButilities(object):
         session.execute('ALTER TABLE %s ADD COLUMN %s %s' % (table_name, column_name, column_type))
 
     @staticmethod
-    def bulk_insert(session, df, obj):
-        session.bulk_insert_mappings(obj, df.to_dict(orient="records"))
+    def bulk_insert(session, df, table_class):
+        session.bulk_insert_mappings(table_class, df.to_dict(orient="records"))
         session.commit()
 
     @staticmethod
-    def bulk_update(session, df, obj):
-        session.bulk_update_mappings(obj, df.to_dict(orient="records"))
+    def bulk_update(session, df, table_class):
+        session.bulk_update_mappings(table_class, df.to_dict(orient="records"))
         session.commit()
 
     @staticmethod
-    def add_or_update(session, df, obj):
-        graphs = DButilities.df_to_objects(df)
-        primary_key = sql.inspect(obj).primary_key[0].name
+    def add_or_update(session, df, table_class):
+        rows = DButilities.df_to_objects(df)
+        primary_key = db.inspect(table_class).primary_key[0].name
 
         # Create table if not created
-        DButilities.create_table(session.get_bind(), obj)
+        DButilities.create_table(session.get_bind(), table_class)
 
         data_update = []
         data_insert = []
-        for key, values in graphs:
+        for key, values in rows:
             # Returns filter query
-            qry = session.query(obj).filter(getattr(obj, primary_key) == key)
+            qry = session.query(table_class).filter(getattr(table_class, primary_key) == key)
             # If qry.one(), then returns the filtered object
             tmp = vars(values)
             tmp[primary_key] = key
@@ -2134,42 +2134,43 @@ class DButilities(object):
                 data_insert.append(vars(values))
 
         # With the filtered data make bulk updates and inserts
-        session.bulk_update_mappings(obj, data_update)
-        session.bulk_insert_mappings(obj, data_insert)
+        session.bulk_update_mappings(table_class, data_update)
+        session.bulk_insert_mappings(table_class, data_insert)
         session.commit()
 
     @staticmethod
     def df_to_objects(df):
         obj_lst = list()
-        for key, values in df.to_dict(orient="index").items():
+        #for key, values in df.to_dict(orient="index").items():
+        for key, values in df.to_dict(orient="records").items():
             obj_lst.append((key.decode("utf-8") , types.SimpleNamespace(**values)))
         return obj_lst
 
     @staticmethod
     def write_graphs_df(engine, df, table_name):
         df.to_sql(table_name, con=engine, if_exists='append', index=False,
-                  dtype={'G6': sql.types.String(),
-                         'Graph': sql.types.String(),
-                         'Super Graph': sql.types.String(),
-                         'Hamiltonian': sql.types.BOOLEAN(),
-                         'Hamiltonian cycle': sql.types.String(),
-                         'Graph Edges': sql.types.String(),
-                         'Avg. polynomial': sql.types.FLOAT(),
-                         'Polynomial': sql.types.String(),
-                         'Spanning Trees': sql.INTEGER(),
-                         'Edge connectivity': sql.INTEGER(),
-                         'Min. k=2 edge-cut': sql.INTEGER(),
-                         'Automorphisms': sql.INTEGER(),
-                         'Diameter': sql.INTEGER(),
-                         'Probability 0.1': sql.types.FLOAT(),
-                         'Probability 0.2': sql.types.FLOAT(),
-                         'Probability 0.3': sql.types.FLOAT(),
-                         'Probability 0.4': sql.types.FLOAT(),
-                         'Probability 0.5': sql.types.FLOAT(),
-                         'Probability 0.6': sql.types.FLOAT(),
-                         'Probability 0.7': sql.types.FLOAT(),
-                         'Probability 0.8': sql.types.FLOAT(),
-                         'Probability 0.9': sql.types.FLOAT()}
+                  dtype={'G6': db.types.String(),
+                         'Graph': db.types.String(),
+                         'Super Graph': db.types.String(),
+                         'Hamiltonian': db.types.BOOLEAN(),
+                         'Hamiltonian cycle': db.types.String(),
+                         'Graph Edges': db.types.String(),
+                         'Avg. polynomial': db.types.FLOAT(),
+                         'Polynomial': db.types.String(),
+                         'Spanning Trees': db.INTEGER(),
+                         'Edge connectivity': db.INTEGER(),
+                         'Min. k=2 edge-cut': db.INTEGER(),
+                         'Automorphisms': db.INTEGER(),
+                         'Diameter': db.INTEGER(),
+                         'Probability 0.1': db.types.FLOAT(),
+                         'Probability 0.2': db.types.FLOAT(),
+                         'Probability 0.3': db.types.FLOAT(),
+                         'Probability 0.4': db.types.FLOAT(),
+                         'Probability 0.5': db.types.FLOAT(),
+                         'Probability 0.6': db.types.FLOAT(),
+                         'Probability 0.7': db.types.FLOAT(),
+                         'Probability 0.8': db.types.FLOAT(),
+                         'Probability 0.9': db.types.FLOAT()}
                   )
 
 
