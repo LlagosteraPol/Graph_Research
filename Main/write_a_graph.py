@@ -476,7 +476,7 @@ graphs = db.Table('Graphs', metadata, autoload=True, autoload_with=engine)
 
 #df = DButilities.read_table(session, Table_Graph, conditions="nodes <= 8")
 
-
+"""
 # Migrate table
 query = db.select([graphs])
 df = pd.read_sql_query(query, engine)
@@ -509,7 +509,7 @@ df.set_index('g6_hash', inplace=True)
 
 
 GraphTools.data_print(df, FormatType.SQL, os.getcwd() + "/Data/DDBB/" + "Graphs_DB_2")
-
+"""
 """
 # Add hash
 for i in range(6, 12):
