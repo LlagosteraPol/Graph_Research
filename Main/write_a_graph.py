@@ -523,6 +523,7 @@ for i in range(6, 12):
     df.set_index('g6_id', inplace=True)
     DButilities.add_or_update(session, df, Table_Graph)
 """
+
 #DButilities.add_column(session, 'Graphs', 'g6_hash' ,'VARCHAR')
 
 """
