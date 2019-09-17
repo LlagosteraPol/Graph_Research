@@ -1,5 +1,7 @@
 import os
+import sys
 import numpy as np
+import hashlib
 import networkx as nx
 from networkx.algorithms import isomorphism
 import sympy
@@ -25,7 +27,10 @@ import types
 Base = declarative_base()
 class Table_Graph(Base):
     __tablename__ = 'Graphs'
-    g6_id = db.Column(db.types.String(), primary_key=True, index=True) # TODO: Check index
+    g6_hash = db.Column(db.types.INTEGER, primary_key=True, index=True)
+    g6 = db.Column(db.types.String(), unique=True, nullable=False)
+    #g6_hash = db.Column(db.types.String())
+    #g6_id = db.Column(db.types.String(), primary_key=True, index=True)
     nodes = db.Column(db.types.INTEGER)
     edges = db.Column(db.types.INTEGER)
     hamiltonian = db.Column(db.types.BOOLEAN)
@@ -630,9 +635,11 @@ class GraphTools(object):
     def data_analysis(graph, binomial_format=False, fast=False):
         p = sympy.symbols("p")
         ham_cycle = GraphTools.hamilton_cycle(graph)
+        g6_bytes = nx.to_graph6_bytes(graph, nodes=None, header=False)
 
         if fast:
-            d = {'g6_id': nx.to_graph6_bytes(graph, nodes=None, header=False),
+            d = {'g6_hash': hashlib.md5(g6_bytes).hexdigest(),
+                 'g6': nx.to_graph6_bytes(graph, nodes=None, header=False),
                  'nodes': str(len(graph.nodes)),
                  'edges': str(len(graph.edges)),
                  'hamiltonian': False if ham_cycle is None else True,
@@ -652,7 +659,8 @@ class GraphTools(object):
             if binomial_format:
                 bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
 
-            d = {'g6_id': nx.to_graph6_bytes(graph, nodes=None, header=False),
+            d = {'g6_hash': hashlib.md5(g6_bytes).hexdigest(),
+                 'g6': g6_bytes.decode(),
                  'nodes': str(len(graph.nodes)),
                  'edges': str(len(graph.edges)),
                  'hamiltonian': False if ham_cycle is None else True,
@@ -676,7 +684,7 @@ class GraphTools(object):
                  'probability_09': poly.subs({p: 0.9})}
 
         df = pd.DataFrame(data=d, index=[0])
-        df.set_index('g6_id', inplace=True)
+        df.set_index('g6_hash', inplace=True)
         return df
 
     @staticmethod
@@ -2144,33 +2152,6 @@ class DButilities(object):
         for key, values in df.to_dict(orient="index").items():
             obj_lst.append((key.decode("utf-8") if type(key) is bytes else key, types.SimpleNamespace(**values)))
         return obj_lst
-
-    @staticmethod
-    def write_graphs_df(engine, df, table_name):
-        df.to_sql(table_name, con=engine, if_exists='append', index=False,
-                  dtype={'G6': db.types.String(),
-                         'Graph': db.types.String(),
-                         'Super Graph': db.types.String(),
-                         'Hamiltonian': db.types.BOOLEAN(),
-                         'Hamiltonian cycle': db.types.String(),
-                         'Graph Edges': db.types.String(),
-                         'Avg. polynomial': db.types.FLOAT(),
-                         'Polynomial': db.types.String(),
-                         'Spanning Trees': db.INTEGER(),
-                         'Edge connectivity': db.INTEGER(),
-                         'Min. k=2 edge-cut': db.INTEGER(),
-                         'Automorphisms': db.INTEGER(),
-                         'Diameter': db.INTEGER(),
-                         'Probability 0.1': db.types.FLOAT(),
-                         'Probability 0.2': db.types.FLOAT(),
-                         'Probability 0.3': db.types.FLOAT(),
-                         'Probability 0.4': db.types.FLOAT(),
-                         'Probability 0.5': db.types.FLOAT(),
-                         'Probability 0.6': db.types.FLOAT(),
-                         'Probability 0.7': db.types.FLOAT(),
-                         'Probability 0.8': db.types.FLOAT(),
-                         'Probability 0.9': db.types.FLOAT()}
-                  )
 
 
 class GraphRel(object):
