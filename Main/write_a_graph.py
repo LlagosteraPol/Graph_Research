@@ -430,7 +430,7 @@ print("G_W: ", Utilities.polynomial2binomial(rel4))
 """
 """
 out_path = os.getcwd() + "/Data/Graph6/"
-for n in range(12, 35):
+for n in range(11, 12):
     GraphTools.gen_all_3ch_hamiltonian_opt(n, out_path)
 """
 
@@ -473,6 +473,7 @@ session = Session()
 metadata = db.MetaData()
 graphs = db.Table('Graphs', metadata, autoload=True, autoload_with=engine)
 
+"""
 for i in range(25, 31):
     print("Updating graph with ", i, " nodes")
     query = db.select([graphs]).where(graphs.columns.nodes == i)
@@ -482,17 +483,19 @@ for i in range(25, 31):
         df.set_value(key, 'polynomial', str(polynomial))
     df.set_index('g6_id', inplace=True)
     DButilities.add_or_update(session, df, Table_Graph)
-
 """
-for i in range(11, 25):
+
+for i in range(24, 25):
+    print("Updating graph with ", i, " nodes")
     query = db.select([graphs]).where(graphs.columns.nodes == i)
     df = pd.read_sql_query(query, engine)
     for key, values in df.iterrows():
         g = nx.from_graph6_bytes(values['g6_id'].rstrip().encode())
         polynomial = Utilities.polynomial2binomial(GraphRel.relpoly_binary_improved(g))[0]
         df.set_value(key, 'polynomial', str(polynomial))
+    df.set_index('g6_id', inplace=True)
     DButilities.add_or_update(session, df, Table_Graph)
-"""
+
 session.close()
 
 
