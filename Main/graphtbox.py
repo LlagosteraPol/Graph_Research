@@ -27,7 +27,7 @@ import types
 Base = declarative_base()
 class Table_Graph(Base):
     __tablename__ = 'Graphs'
-    g6_hash = db.Column(db.types.INTEGER, primary_key=True, index=True)
+    g6_hash = db.Column(db.types.String(), primary_key=True, index=True)
     g6 = db.Column(db.types.String(), unique=True, nullable=False)
     #g6_hash = db.Column(db.types.String())
     #g6_id = db.Column(db.types.String(), primary_key=True, index=True)
@@ -2083,12 +2083,20 @@ class DButilities(object):
     @staticmethod
     def read_table(session, table, column='*', conditions=None):
         if conditions:
-            query = "SELECT " + column + " FROM " + table + " WHERE " + conditions
+            query = "SELECT " + column + " FROM " + table.__tablename__ + " WHERE " + conditions
 
         else:
-            query = "SELECT " + column + " FROM " + table
+            query = "SELECT " + column + " FROM " + table.__tablename__
 
-        return pd.read_sql_query(query, session)
+        df = pd.read_sql_query(query, session.get_bind())
+
+        metadata = db.MetaData()
+        graphs = db.Table(table.__tablename__, metadata, autoload=True, autoload_with=session.get_bind())
+        table_skeleton = {col.name: col.type.python_type for col in graphs.c}
+
+        df = df.astype(table_skeleton)
+        df.set_index(db.inspect(table).primary_key[0].name, inplace=True)
+        return df
 
     @staticmethod
     def create_table(engine, table):

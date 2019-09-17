@@ -470,17 +470,44 @@ print(polynomial)
 engine = db.create_engine('sqlite:///' + os.getcwd() + "/Data/DDBB/Graphs_DB.db", echo=False)
 Session = db.orm.session.sessionmaker(bind=engine)
 session = Session()
+session._model_changes = {}
 metadata = db.MetaData()
 graphs = db.Table('Graphs', metadata, autoload=True, autoload_with=engine)
 
+#df = DButilities.read_table(session, Table_Graph, conditions="nodes <= 8")
+
 
 # Migrate table
-query = db.select([graphs]).where(graphs.columns.nodes <= 8)
+query = db.select([graphs])
 df = pd.read_sql_query(query, engine)
-print(df.head())
-df.rename(columns={'g6_id':'g6'})
-print(df.head())
+df.rename(columns={'g6_id': 'g6'}, inplace=True)
+
+df = df.astype({Table_Graph.g6_hash.name: Table_Graph.g6_hash.type.python_type,
+                Table_Graph.g6.name: Table_Graph.g6.type.python_type,
+                Table_Graph.nodes.name: Table_Graph.nodes.type.python_type,
+                Table_Graph.edges.name: Table_Graph.edges.type.python_type,
+                Table_Graph.hamiltonian.name: Table_Graph.hamiltonian.type.python_type,
+                Table_Graph.hamiltonian_cycle.name: Table_Graph.hamiltonian_cycle.type.python_type,
+                Table_Graph.graph_edges.name: Table_Graph.graph_edges.type.python_type,
+                Table_Graph.avg_polynomial.name: Table_Graph.avg_polynomial.type.python_type,
+                Table_Graph.polynomial.name: Table_Graph.polynomial.type.python_type,
+                Table_Graph.spanning_trees.name: Table_Graph.spanning_trees.type.python_type,
+                Table_Graph.edge_connectivity.name: Table_Graph.edge_connectivity.type.python_type,
+                Table_Graph.min_k2_edge_cuts.name: Table_Graph.min_k2_edge_cuts.type.python_type,
+                Table_Graph.automorphisms.name: Table_Graph.automorphisms.type.python_type,
+                Table_Graph.diameter.name: Table_Graph.diameter.type.python_type,
+                Table_Graph.probability_01.name: Table_Graph.probability_01.type.python_type,
+                Table_Graph.probability_02.name: Table_Graph.probability_02.type.python_type,
+                Table_Graph.probability_03.name: Table_Graph.probability_03.type.python_type,
+                Table_Graph.probability_04.name: Table_Graph.probability_04.type.python_type,
+                Table_Graph.probability_05.name: Table_Graph.probability_05.type.python_type,
+                Table_Graph.probability_06.name: Table_Graph.probability_06.type.python_type,
+                Table_Graph.probability_07.name: Table_Graph.probability_07.type.python_type,
+                Table_Graph.probability_08.name: Table_Graph.probability_08.type.python_type,
+                Table_Graph.probability_09.name: Table_Graph.probability_09.type.python_type})
 df.set_index('g6_hash', inplace=True)
+
+
 GraphTools.data_print(df, FormatType.SQL, os.getcwd() + "/Data/DDBB/" + "Graphs_DB_2")
 
 """
