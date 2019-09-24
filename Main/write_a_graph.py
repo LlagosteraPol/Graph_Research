@@ -533,26 +533,35 @@ for i in range(25, 31):
     query = db.select([graphs]).where(graphs.columns.nodes == i)
     df = pd.read_sql_query(query, engine)
     for key, values in df.iterrows():
-        polynomial = Utilities.polynomial2binomial(sympy.Poly(values['polynomial']))[0]
+        try:
+            polynomial = Utilities.polynomial2binomial(sympy.Poly(values['polynomial']))[0]
+        except:
+            polynomial = 0
+            print(values['g6'])
         df.set_value(key, 'polynomial', str(polynomial))
     df.set_index('g6_hash', inplace=True)
     DButilities.add_or_update(session, df, Table_Graph)
 """
-"""
+
 # Recalculate polynomials
-for i in range(24, 25):
+for i in range(11, 25):
     print("Updating graph with ", i, " nodes")
     query = db.select([graphs]).where(graphs.columns.nodes == i)
     df = pd.read_sql_query(query, engine)
     for key, values in df.iterrows():
         g = nx.from_graph6_bytes(values['g6'].rstrip().encode())
-        polynomial = Utilities.polynomial2binomial(GraphRel.relpoly_binary_improved(g))[0]
+        try:
+            polynomial = Utilities.polynomial2binomial(GraphRel.relpoly_binary_improved(g))[0]
+        except:
+            polynomial = 0
+            print(values['g6'])
+
         df.set_value(key, 'polynomial', str(polynomial))
     df.set_index('g6_hash', inplace=True)
     DButilities.add_or_update(session, df, Table_Graph)
 
 session.close()
-"""
+
 """
 test = pd.DataFrame({'g6_id': ['test'], 'nodes': [np.nan], 'edges': [np.nan], 'hamiltonian': [np.nan],
                      'hamiltonian_cycle': [np.nan], 'graph_edges': [np.nan], 'avg_polynomial': [np.nan],

@@ -318,6 +318,7 @@ class Utilities(object):
 
         # Get coefficients (and round the ones really close to 0)
         coefficients = Utilities.refine_polynomial_coefficients(polynomial)
+        pre_coef = coefficients
         coefficients = np.trim_zeros(coefficients)  # Delete all right zeroes
         n_coeff = len(coefficients)
 
@@ -327,11 +328,7 @@ class Utilities(object):
         for i in range(1, n_coeff):
             coeff2expand = coefficients[-i]
             expanded = sympy.Poly(coeff2expand * p ** (aux_degree - n_coeff + 1) * (1 - p) ** (aux - 1))
-            try:
-                tmp_coefficients = expanded.all_coeffs()
-            except:
-                print("Rel(g,p)= ",polynomial)
-                print("sympy.polys.polyerrors.PolynomialError: multivariate polynomials not supported")
+            tmp_coefficients = expanded.all_coeffs()
             tmp_coefficients = np.trim_zeros(tmp_coefficients)
             tmp_n_coeff = len(tmp_coefficients)
 
@@ -362,7 +359,7 @@ class Utilities(object):
 
         refined_coefficients = list()
         for coefficient in coefficients:
-            refined_coefficients.append(round(coefficient, 4))
+            refined_coefficients.append(round(coefficient, 0))
 
         return refined_coefficients
 
@@ -657,7 +654,11 @@ class GraphTools(object):
 
             bin_poly = None
             if binomial_format:
-                bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
+                try:
+                    bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
+                except:
+                    bin_poly = 0
+                    print(g6_bytes.decode())
 
             d = {'g6_hash': hashlib.md5(g6_bytes).hexdigest(),
                  'g6': g6_bytes.decode(),
