@@ -318,7 +318,6 @@ class Utilities(object):
 
         # Get coefficients (and round the ones really close to 0)
         coefficients = Utilities.refine_polynomial_coefficients(polynomial)
-        pre_coef = coefficients
         coefficients = np.trim_zeros(coefficients)  # Delete all right zeroes
         n_coeff = len(coefficients)
 
@@ -336,7 +335,7 @@ class Utilities(object):
                 coefficients[(-z - (n_coeff - tmp_n_coeff))] -= tmp_coefficients[-z]
 
             aux -= 1
-            aux_degree -= 1
+            aux_degree += 1
 
         # Assemble binomial polynomial
         aux_degree = degree
@@ -633,6 +632,8 @@ class GraphTools(object):
         p = sympy.symbols("p")
         ham_cycle = GraphTools.hamilton_cycle(graph)
         g6_bytes = nx.to_graph6_bytes(graph, nodes=None, header=False)
+        # Remove possible end newline
+        g6_bytes = g6_bytes.decode().rstrip('\n').encode()
 
         if fast:
             d = {'g6_hash': hashlib.md5(g6_bytes).hexdigest(),
@@ -657,6 +658,7 @@ class GraphTools(object):
                 try:
                     bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
                 except:
+                    bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
                     bin_poly = 0
                     print(g6_bytes.decode())
 
@@ -1173,23 +1175,27 @@ class GraphTools(object):
             else:
                 edges = max_chords + nodes
 
-            data_frames = list()
+            data_frames = None
             for i in range(nodes, edges + 1):
                 file_name = "Graph_n" + str(nodes) + "_e" + str(i)
                 if os.path.isfile(path + file_name + ".g6"):
                     print("\nAnalyzing file: ", file_name)
                     g_list = nx.read_graph6(path + file_name + ".g6")
+                    if type(g_list) is not list:
+                        g_list = [g_list]
                     #TODO: Improve efficiency
                     for g in g_list:
-                        data_frames.append(GraphTools.data_analysis(g, binomial_format, fast))
+                        if data_frames is None:
+                            data_frames = GraphTools.data_analysis(g, binomial_format, fast)
+                        else:
+                            data_frames = data_frames.append(GraphTools.data_analysis(g, binomial_format, fast))
                     print("\nAnalyzed")
 
                 else:
                     print("\n File ", file_name, ".g6 not found.")
 
-            for df in data_frames:
-                #TODO: Maybe input write format
-                GraphTools.data_print(df, FormatType.SQL,  os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
+            #TODO: Maybe input write format
+            GraphTools.data_print(data_frames, FormatType.SQL,  os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
         print("\nDone")
 
     @staticmethod

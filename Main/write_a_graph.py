@@ -612,8 +612,9 @@ tests_dict2 = tests.to_dict(orient="index")
 DButilities.add_or_update(session, tests, Table_Graph)
 """
 
+print(Utilities.polynomial2binomial(sympy.Poly(72.0*p**13 - 702.0*p**12 + 3024.0*p**11 - 7532.0*p**10 + 11893.0*p**9 - 12228.0*p**8 + 8027.0*p**7 - 3093.0*p**6 + 540.0*p**5, p, domain='RR')))
 
-
+print(Utilities.polynomial2binomial(sympy.Poly(4.0*p**7 - 11.0*p**6 + 8.0*p**5, p, domain='RR')))
 
 
 
