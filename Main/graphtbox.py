@@ -22,6 +22,7 @@ import time
 import sqlalchemy as db
 from sqlalchemy.ext.declarative import declarative_base
 import pandas as pd
+import xlsxwriter
 import types
 
 Base = declarative_base()
@@ -703,7 +704,12 @@ class GraphTools(object):
             data.to_html(path + ".html")
 
         elif write_fomat == FormatType.Excel:
-            data.to_excel(path + ".xml")
+            # Create a Pandas Excel writer using XlsxWriter as the engine.
+            writer = pd.ExcelWriter(path + ".xlsx", engine='xlsxwriter')
+            # Convert the dataframe to an XlsxWriter Excel object.
+            data.to_excel(writer, sheet_name='Sheet1')
+            # Close the Pandas Excel writer and output the Excel file.
+            writer.save()
 
         elif write_fomat == FormatType.SQL:
             engine = db.create_engine('sqlite:///' + path + ".db", echo=False)

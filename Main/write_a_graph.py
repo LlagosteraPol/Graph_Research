@@ -611,10 +611,17 @@ tests_dict = tests.to_dict(orient="records")
 tests_dict2 = tests.to_dict(orient="index")
 DButilities.add_or_update(session, tests, Table_Graph)
 """
+t = list(Utilities.set_combinations({'x1','x2','x3','x4','x5','x6'}, 4))
+processed = ""
+for element in t:
+    temp = list(element)
+    for value in temp:
+        processed += temp[0] + "*" + temp[1] + "+"
 
-print(Utilities.polynomial2binomial(sympy.Poly(72.0*p**13 - 702.0*p**12 + 3024.0*p**11 - 7532.0*p**10 + 11893.0*p**9 - 12228.0*p**8 + 8027.0*p**7 - 3093.0*p**6 + 540.0*p**5, p, domain='RR')))
+print(list(Utilities.set_combinations({'x1','x2','x3','x4','x5','x6'}, 2)))
 
-print(Utilities.polynomial2binomial(sympy.Poly(4.0*p**7 - 11.0*p**6 + 8.0*p**5, p, domain='RR')))
+
+
 
 
 
