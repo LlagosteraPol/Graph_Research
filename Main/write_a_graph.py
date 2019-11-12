@@ -611,6 +611,8 @@ tests_dict = tests.to_dict(orient="records")
 tests_dict2 = tests.to_dict(orient="index")
 DButilities.add_or_update(session, tests, Table_Graph)
 """
+
+"""
 t = list(Utilities.set_combinations({'x1','x2','x3','x4','x5','x6'}, 4))
 processed = ""
 for element in t:
@@ -619,8 +621,36 @@ for element in t:
         processed += temp[0] + "*" + temp[1] + "+"
 
 print(list(Utilities.set_combinations({'x1','x2','x3','x4','x5','x6'}, 2)))
+"""
 
+types = GraphTools.gen_ham_3ch_types([11,11,1,11,11,1])
+rels = []
+for type in types:
+    i = 1
+    rel = Utilities.polynomial2binomial(GraphRel.relpoly_binary_improved(type))
+    rels.append(rel)
+    print("Type ", i, " Rel = ", rel)
+    i +=1
 
+"""
+rels = []
+for type in types:
+    GraphTools.plot(type)
+    g6 = nx.to_graph6_bytes(type, nodes=None, header=False)
+    tt = g6.decode().rstrip('\n')
+    hashed = hashlib.md5(tt.encode())
+    #query = db.select([graphs]).where(graphs.columns.g6_hash == hashed)
+    query = db.select([graphs]).where(graphs.columns.g6 == tt)
+    df = pd.read_sql_query(query, engine)
+
+for key, values in df.iterrows():
+    print(values['polynomial'])
+    #i = 1
+    #rel = Utilities.polynomial2binomial(GraphRel.relpoly_binary_improved(type))
+    #rels.append(rel)
+    #print("Type ", i, " Rel = ", rel)
+    #i +=1
+"""
 
 
 

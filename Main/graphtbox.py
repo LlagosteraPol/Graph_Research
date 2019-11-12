@@ -1251,7 +1251,7 @@ class GraphTools(object):
         print(decoded, file=open(os.getcwd() + "/Data/Graph6/" + file_name + ".g6", "w"))
 
     @staticmethod
-    def generate_random_hamiltonian(n_nodes, chords, p_new_connection=0.1):
+    def gen_random_hamiltonian(n_nodes, chords, p_new_connection=0.1):
         """
         Generate a random Hamiltonian graph with the nodes and chords provided
         :param n_nodes: Number of nodes of the graph
@@ -1404,6 +1404,57 @@ class GraphTools(object):
             return GraphTools.filter_isomorphisms(ham_graphs)
         else:
             GraphTools.filter_isomorphisms(ham_graphs, out_path)
+
+    @staticmethod
+    def gen_ham_3ch_types(cpaths):
+
+        total_len = 0
+        for path_len in cpaths:
+            total_len += path_len
+
+        base_cycle = nx.cycle_graph(total_len)
+
+        # Type A
+        a_cycle = copy.deepcopy(base_cycle)
+        a1 = cpaths[0]
+        a2 = cpaths[0] + cpaths[1] + cpaths[2] + cpaths[3]
+        b1 = cpaths[0] + cpaths[1]
+        b2 = cpaths[0] + cpaths[1] + cpaths[2] + cpaths[3] + cpaths[4]
+        c1 = cpaths[0] + cpaths[1] + cpaths[2]
+        c2 = 0
+        a_cycle.add_edges_from([(a1, a2), (b1, b2), (c1, c2)])
+
+        # Type B
+        b_cycle = copy.deepcopy(base_cycle)
+        a1 = cpaths[0]
+        a2 = 0
+        b1 = cpaths[0] + cpaths[1]
+        b2 = cpaths[0] + cpaths[1] + cpaths[2] + cpaths[3] + cpaths[4]
+        c1 = cpaths[0] + cpaths[1] + cpaths[2]
+        c2 = cpaths[0] + cpaths[1] + cpaths[2] + cpaths[3]
+        b_cycle.add_edges_from([(a1, a2), (b1, b2), (c1, c2)])
+
+        # Type C
+        c_cycle = copy.deepcopy(base_cycle)
+        a1 = cpaths[0]
+        a2 = 0
+        b1 = cpaths[0] + cpaths[1]
+        b2 = cpaths[0] + cpaths[1] + cpaths[2] + cpaths[3]
+        c1 = cpaths[0] + cpaths[1] + cpaths[2]
+        c2 = cpaths[0] + cpaths[1] + cpaths[2] + cpaths[3] + cpaths[4]
+        c_cycle.add_edges_from([(a1, a2), (b1, b2), (c1, c2)])
+
+        # Type D
+        d_cycle = copy.deepcopy(base_cycle)
+        a1 = cpaths[0]
+        a2 = cpaths[0] + cpaths[1] + cpaths[2] + cpaths[3] + cpaths[4]
+        b1 = cpaths[0] + cpaths[1]
+        b2 = cpaths[0] + cpaths[1] + cpaths[2] + cpaths[3]
+        c1 = cpaths[0] + cpaths[1] + cpaths[2]
+        c2 = 0
+        d_cycle.add_edges_from([(a1, a2), (b1, b2), (c1, c2)])
+
+        return [a_cycle, b_cycle, c_cycle, d_cycle]
 
     @staticmethod
     def filter_uniformly_most_reliable_graph(g_list):
