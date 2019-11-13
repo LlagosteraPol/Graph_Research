@@ -770,17 +770,17 @@ for key, values in df.iterrows():
 """
 
 
-g_types = GraphTools.gen_ham_3ch_types([1,1,1,1,1,1])
+g_types = GraphTools.gen_ham_3ch_types([2,2,7,2,2,7])
 
-GraphTools.plot(g_types[2])
+#GraphTools.plot(g_types[2])
 
-a2, a3, at, a_pol = a_rel(1,1,1,1,1,1)
+a2, a3, at, a_pol = a_rel(2,2,7,2,2,7)
 
-a_poly = GraphRel.relpoly_binary_improved(g_types[0])
+#a_poly = GraphRel.relpoly_binary_improved(g_types[0])
 print("A")
 print("Generated", a_pol)
-print("Computed: ", Utilities.polynomial2binomial(a_poly))
-print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[0])))
+#print("Computed: ", Utilities.polynomial2binomial(a_poly))
+#print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[0])))
 """
 
 g_types = GraphTools.gen_ham_3ch_types([2,2,2,2,2,2])
@@ -798,12 +798,16 @@ print("Generated", c_pol)
 print("Computed: ", Utilities.polynomial2binomial(c_poly))
 print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[2])))
 """
-d2, d3, dt, d_pol = d_rel(1,1,1,1,1,1)
-d_poly = GraphRel.relpoly_binary_improved(g_types[3])
+d2, d3, dt, d_pol = d_rel(2,2,7,2,2,7)
+#d_poly = GraphRel.relpoly_binary_improved(g_types[3])
 print("D")
 print("Generated", d_pol)
-print("Computed: ", Utilities.polynomial2binomial(d_poly))
-print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[3])))
+#print("Computed: ", Utilities.polynomial2binomial(d_poly))
+#print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[3])))
+
+
+roots = roots(sympy.Poly(a_pol) - sympy.Poly(d_pol))
+print(roots)
 
 
 
