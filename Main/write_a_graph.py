@@ -1,5 +1,118 @@
 from Main.graphtbox import *
 
+def a_rel(x1, x2, x3, x4, x5, x6):
+    p = sympy.symbols('p')
+
+    nodes = x1 + x2 + x3 + x4 + x5 + x6
+    edges = nodes + 3
+
+    a2 = 3+3*nodes+x1*x3+x1*x5+x1*x4+x1*x2+x1*x6+x5*x3+x4*x3+x2*x3+x6*x3+x4*x5+x5*x2+x5*x6+x4*x2+x4*x6+x2*x6
+
+    a3 = 1+3*nodes+(x1+x2)*x3+(x1+x2)*(x4+x5)+(x1+x2)*x6+x3*(x4+x5)+x3*x6+(x4+x5)*x6+x1*(x2+x3)+x1*x4+x1*(x5+x6)+\
+         (x2+x3)*x4+(x2+x3)*(x5+x6)+x4*(x5+x6)+(x1+x6)*x2+(x1+x6)*(x3+x4)+(x1+x6)*x5+x2*(x3+x4)+x2*x5+\
+         (x3+x4)*x5+x5*x6*x3+x5*x3*x2+x5*x4*x3+x5*x1*x3+x5*x6*x2+x5*x4*x6+x5*x1*x6+x5*x4*x2+x5*x1*x2+\
+         x5*x1*x4+x6*x3*x2+x4*x6*x3+x6*x1*x3+x4*x3*x2+x1*x3*x2+x4*x1*x3+x4*x6*x2+x1*x6*x2+x4*x1*x6+x4*x1*x2
+
+    at = nodes+(x1+x2+x3)*(x4+x5+x6)+(x1+x2+x6)*(x3+x4+x5)+(x1+x5+x6)*(x2+x3+x4)+(x1+x2)*x3*(x4+x5)+(x1+x2)*x3*x6+\
+         (x1+x2)*(x4+x5)*x6+x3*(x4+x5)*x6+x1*(x2+x3)*x4+x1*(x2+x3)*(x5+x6)+x1*x4*(x5+x6)+(x2+x3)*x4*(x5+x6)+\
+         (x1+x6)*x2*(x3+x4)+(x1+x6)*x2*x5+(x1+x6)*(x3+x4)*x5+x2*(x3+x4)*x5+x1*x2*x3*x4+x1*x2*x6*x3+x1*x2*x3*x5+\
+         x1*x2*x6*x4+x1*x2*x5*x4+x1*x2*x6*x5+x1*x6*x3*x4+x1*x5*x3*x4+x1*x6*x3*x5+x1*x5*x6*x4+x2*x6*x3*x4+\
+         x2*x5*x3*x4+x2*x6*x3*x5+x2*x6*x5*x4+x5*x6*x3*x4-(x1*x2*x4*x5+x1*x3*x4*x6+x2*x3*x5*x6)
+
+    polynomial = p**edges + edges*p**(edges-1)*(1-p) + a2*p**(edges-2)*(1-p)**2\
+                 + a3*p**(edges-3)*(1-p)**3 + at*p**(edges-4)*(1-p)**4
+
+    return a2, a3, at, polynomial
+
+
+def b_rel(x1, x2, x3, x4, x5, x6):
+    p = sympy.symbols('p')
+
+    nodes = x1 + x2 + x3 + x4 + x5 + x6
+    edges = nodes + 3
+
+    b2 = 3+3*nodes+x1*x3+x1*x5+x1*x4+x1*x2+x1*x6+x5*x3+x4*x3+x2*x3+x6*x3+x4*x5+x5*x2+x5*x6+x4*x2+x4*x6+x2*x6\
+         -(x2*x6+x3*x5)
+
+    b3 = 1+3*nodes+(x1+x2+x6)*x3+(x1+x2+x6)*x4+(x1+x2+x6)*x5+x3*x4+x4*x5+x1*(x2+x3)+x1*x4+x1*(x5+x6)+\
+         (x2+x3)*x4+x4*(x5+x6)+x1*x2+x1*(x3+x4+x5)+x1*x6+x2*(x3+x4+x5)+(x3+x4+x5)*x6+x5*x6*x3+\
+         x5*x3*x2+x5*x4*x3+x5*x1*x3+x5*x6*x2+x5*x4*x6+x5*x1*x6+x5*x4*x2+x5*x1*x2+x5*x1*x4+x6*x3*x2+\
+         x4*x6*x3+x6*x1*x3+x4*x3*x2+x1*x3*x2+x4*x1*x3+x4*x6*x2+x1*x6*x2+x4*x1*x6+x4*x1*x2\
+         -(x1*x2*x6+x1*x3*x5+x2*x3*x5+x2*x3*x6+x2*x4*x6+x2*x5*x6+x3*x4*x5+x3*x5*x6)
+
+    bt = nodes+(x1+x2+x3+x5+x6)*x4+(x1+x2+x6)*(x3+x4+x5)+x1*(x2+x3+x4+x5+x6)+(x1+x2+x6)*x3*x4+\
+         (x1+x2+x6)*x4*x5+x1*(x2+x3)*x4+x1*(x5+x6)*x4+x1*x2*(x3+x4+x5)+x1*(x3+x4+x5)*x6+x1*x2*x3*x4+\
+         x1*x2*x6*x3+x1*x2*x3*x5+x1*x2*x6*x4+x1*x2*x5*x4+x1*x2*x6*x5+x1*x6*x3*x4+x1*x5*x3*x4+x1*x6*x3*x5+\
+         x1*x5*x6*x4+x2*x6*x3*x4+x2*x5*x3*x4+x2*x6*x3*x5+x2*x6*x5*x4+x5*x6*x3*x4\
+         -(x1*x2*x3*x5+x1*x2*x3*x6+x1*x2*x4*x6+x1*x2*x5*x6+x1*x3*x4*x5+x1*x3*x5*x6+
+          x2*x3*x4*x5+x2*x3*x4*x6+x2*x3*x5*x6+x2*x4*x5*x6+x3*x4*x5*x6)
+
+    polynomial = p ** edges + edges * p ** (edges - 1) * (1 - p) + b2 * p ** (edges - 2) * (1 - p) ** 2 \
+                 + b3 * p ** (edges - 3) * (1 - p) ** 3 + bt * p ** (edges - 4) * (1 - p) ** 4
+
+    return b2, b3, bt, polynomial
+
+
+def c_rel(x1, x2, x3, x4, x5, x6):
+    p = sympy.symbols('p')
+
+    nodes = x1 + x2 + x3 + x4 + x5 + x6
+    edges = nodes + 3
+
+    c2 = 3+3*nodes+x1*x3+x1*x5+x1*x4+x1*x2+x1*x6+x5*x3+x4*x3+x2*x3+x6*x3+x4*x5+x5*x2+x5*x6+x4*x2+x4*x6+x2*x6-\
+         (x2*x6)
+
+    c3 = 1+3*nodes+\
+         (x1+x2+x6)*x3+(x1+x2+x6)*x4+(x1+x2+x6)*x5+x3*x4+x3*x5+x4*x5+\
+         x1*(x2+x3)+x1*(x4+x5)+x1*x6+(x2+x3)*(x4+x5)+(x4+x5)*x6+\
+         x1*x2+x1*(x3+x4)+x1*(x5+x6)+x2*(x3+x4)+(x3+x4)*(x5+x6)+\
+         x5*x6*x3+x5*x3*x2+x5*x4*x3+x5*x1*x3+x5*x6*x2+x5*x4*x6+x5*x1*x6+x5*x4*x2+x5*x1*x2+\
+         x5*x1*x4+x6*x3*x2+x4*x6*x3+x6*x1*x3+x4*x3*x2+x1*x3*x2+x4*x1*x3+x4*x6*x2+x1*x6*x2+x4*x1*x6+x4*x1*x2\
+         -(x1*x2*x6+x2*x3*x6+x2*x4*x6+x2*x5*x6)
+
+    ct = nodes+(x1+x2+x3+x6)*(x4+x5)+\
+         (x1+x2+x5+x6)*(x3+x4)+\
+         x1*(x2+x3+x4+x5+x6)+\
+         (x1+x2+x6)*x3*x4+(x1+x2+x6)*x3*x5+(x1+x2+x6)*x4*x5+x3*x4*x5+\
+         x1*(x2+x3)*(x4+x5)+x1*(x4+x5)*x6+\
+         x1*x2*(x3+x4)+x1*(x3+x4)*(x5+x6)+\
+         x1*x2*x3*x4+x1*x2*x6*x3+x1*x2*x3*x5+x1*x2*x6*x4+x1*x2*x5*x4+x1*x2*x6*x5+\
+         x1*x6*x3*x4+x1*x5*x3*x4+x1*x6*x3*x5+x1*x5*x6*x4+x2*x6*x3*x4+x2*x5*x3*x4+x2*x6*x3*x5+\
+         x2*x6*x5*x4+x5*x6*x3*x4\
+         -(x1*x2*x3*x6+x1*x2*x4*x6+x1*x2*x5*x6+x2*x3*x4*x5+x2*x3*x4*x6+x2*x3*x5*x6+x2*x4*x5*x6+x3*x4*x5*x6)
+
+    polynomial = p ** edges + edges * p ** (edges - 1) * (1 - p) + c2 * p ** (edges - 2) * (1 - p) ** 2 \
+                 + c3 * p ** (edges - 3) * (1 - p) ** 3 + ct * p ** (edges - 4) * (1 - p) ** 4
+
+    return c2, c3, ct, polynomial
+
+
+def d_rel(x1, x2, x3, x4, x5, x6):
+    p = sympy.symbols('p')
+
+    nodes = x1 + x2 + x3 + x4 + x5 + x6
+    edges = nodes + 3
+
+    d2 = 3+3*nodes+x1*x3+x1*x5+x1*x4+x1*x2+x1*x6+x5*x3+x4*x3+x2*x3+x6*x3+x4*x5+x5*x2+x5*x6+x4*x2+x4*x6+x2*x6
+
+    d3 = 1+3*nodes+(x1+x6)*x2+(x1+x6)*(x3+x4)+(x1+x6)*x5+x2*(x3+x4)+(x3+x4)*x5+(x1+x2)*x3+(x1+x2)*x4+\
+         (x1+x2)*(x5+x6)+x3*x4+x3*(x5+x6)+x4*(x5+x6)+x1*(x2+x3)+x1*(x4+x5)+x1*x6+(x2+x3)*(x4+x5)+(x2+x3)*x6+\
+         (x4+x5)*x6+x5*x6*x3+x5*x3*x2+x5*x4*x3+x5*x1*x3+x5*x6*x2+x5*x4*x6+x5*x1*x6+x5*x4*x2+x5*x1*x2+x5*x1*x4+\
+         x6*x3*x2+x4*x6*x3+x6*x1*x3+x4*x3*x2+x1*x3*x2+x4*x1*x3+x4*x6*x2+x1*x6*x2+x4*x1*x6+x4*x1*x2
+
+    dt = nodes+(x1+x2+x3+x5+x6)*(x3+x4)+(x1+x6)*(x2+x3+x4+x5)+(x1+x2+x3)*(x4+x5+x6)+\
+         (x1+x6)*x2*(x3+x4)+(x1+x6)*(x3+x4)*x5+(x1+x2)*x3*x4+(x1+x2)*x3*(x5+x6)+\
+         (x1+x2)*x4*(x5+x6)+x3*x4*(x5+x6)+x1*(x2+x3)*(x4+x5)+x1*(x2+x3)*x6+x1*(x4+x5)*x6+\
+         (x2+x3)*(x4+x5)*x6+x1*x2*x3*x4+x1*x2*x6*x3+x1*x2*x3*x5+x1*x2*x6*x4+x1*x2*x5*x4+\
+         x1*x2*x6*x5+x1*x6*x3*x4+x1*x5*x3*x4+x1*x6*x3*x5+x1*x5*x6*x4+x2*x6*x3*x4+x2*x5*x3*x4+\
+         x2*x6*x3*x5+x2*x6*x5*x4+x5*x6*x3*x4\
+         -(x1*x2*x5*x6+x1*x3*x4*x6+x2*x3*x4*x5)
+
+    polynomial = p ** edges + edges * p ** (edges - 1) * (1 - p) + d2 * p ** (edges - 2) * (1 - p) ** 2 \
+                 + d3 * p ** (edges - 3) * (1 - p) ** 3 + dt * p ** (edges - 4) * (1 - p) ** 4
+
+    return d2, d3, dt, polynomial
+
 def opt_ham_n7(chords):
     """
     This function retrieves the hamiltonian graph of 7 nodes and ch chords with optimal Reliability Polynomial
@@ -622,7 +735,7 @@ for element in t:
 
 print(list(Utilities.set_combinations({'x1','x2','x3','x4','x5','x6'}, 2)))
 """
-
+"""
 types = GraphTools.gen_ham_3ch_types([11,11,1,11,11,1])
 rels = []
 for type in types:
@@ -631,7 +744,7 @@ for type in types:
     rels.append(rel)
     print("Type ", i, " Rel = ", rel)
     i +=1
-
+"""
 """
 rels = []
 for type in types:
@@ -652,6 +765,41 @@ for key, values in df.iterrows():
     #i +=1
 """
 
+"""
+g_types = GraphTools.gen_ham_3ch_types([1,1,1,1,1,1])
+
+GraphTools.plot(g_types[2])
+
+a2, a3, at, a_pol = a_rel(1,1,1,1,1,1)
+
+a_poly = GraphRel.relpoly_binary_improved(g_types[0])
+print("A")
+print("Generated", a_pol)
+print("Computed: ", Utilities.polynomial2binomial(a_poly))
+print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[0])))
+"""
+
+g_types = GraphTools.gen_ham_3ch_types([2,2,2,2,2,2])
+
+b2, b3, bt, b_pol = b_rel(2,2,2,2,2,2)
+poly = GraphRel.relpoly_binary_improved(g_types[1])
+print("B")
+print("Generated", b_pol)
+print("Computed: ", Utilities.polynomial2binomial(poly))
+
+c2, c3, ct, c_pol = c_rel(2,2,2,2,2,2)
+c_poly = GraphRel.relpoly_binary_improved(g_types[2])
+print("C")
+print("Generated", c_pol)
+print("Computed: ", Utilities.polynomial2binomial(c_poly))
+print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[2])))
+
+d2, d3, dt, d_pol = d_rel(2,2,2,2,2,2)
+d_poly = GraphRel.relpoly_binary_improved(g_types[3])
+print("D")
+print("Generated", d_pol)
+print("Computed: ", Utilities.polynomial2binomial(d_poly))
+print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[3])))
 
 
 
