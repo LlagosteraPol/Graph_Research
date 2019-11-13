@@ -100,10 +100,14 @@ def d_rel(x1, x2, x3, x4, x5, x6):
          (x4+x5)*x6+x5*x6*x3+x5*x3*x2+x5*x4*x3+x5*x1*x3+x5*x6*x2+x5*x4*x6+x5*x1*x6+x5*x4*x2+x5*x1*x2+x5*x1*x4+\
          x6*x3*x2+x4*x6*x3+x6*x1*x3+x4*x3*x2+x1*x3*x2+x4*x1*x3+x4*x6*x2+x1*x6*x2+x4*x1*x6+x4*x1*x2
 
-    dt = nodes+(x1+x2+x3+x5+x6)*(x3+x4)+(x1+x6)*(x2+x3+x4+x5)+(x1+x2+x3)*(x4+x5+x6)+\
-         (x1+x6)*x2*(x3+x4)+(x1+x6)*(x3+x4)*x5+(x1+x2)*x3*x4+(x1+x2)*x3*(x5+x6)+\
-         (x1+x2)*x4*(x5+x6)+x3*x4*(x5+x6)+x1*(x2+x3)*(x4+x5)+x1*(x2+x3)*x6+x1*(x4+x5)*x6+\
-         (x2+x3)*(x4+x5)*x6+x1*x2*x3*x4+x1*x2*x6*x3+x1*x2*x3*x5+x1*x2*x6*x4+x1*x2*x5*x4+\
+    dt = nodes+\
+         (x1+x2+x5+x6)*(x3+x4)+\
+         (x1+x6)*(x2+x3+x4+x5)+\
+         (x1+x2+x3)*(x4+x5+x6)+\
+         (x1+x6)*x2*(x3+x4)+(x1+x6)*(x3+x4)*x5+\
+         (x1+x2)*x3*x4+(x1+x2)*x3*(x5+x6)+(x1+x2)*x4*(x5+x6)+x3*x4*(x5+x6)+\
+         x1*(x2+x3)*(x4+x5)+x1*(x2+x3)*x6+x1*(x4+x5)*x6+(x2+x3)*(x4+x5)*x6+\
+         x1*x2*x3*x4+x1*x2*x6*x3+x1*x2*x3*x5+x1*x2*x6*x4+x1*x2*x5*x4+\
          x1*x2*x6*x5+x1*x6*x3*x4+x1*x5*x3*x4+x1*x6*x3*x5+x1*x5*x6*x4+x2*x6*x3*x4+x2*x5*x3*x4+\
          x2*x6*x3*x5+x2*x6*x5*x4+x5*x6*x3*x4\
          -(x1*x2*x5*x6+x1*x3*x4*x6+x2*x3*x4*x5)
@@ -765,7 +769,7 @@ for key, values in df.iterrows():
     #i +=1
 """
 
-"""
+
 g_types = GraphTools.gen_ham_3ch_types([1,1,1,1,1,1])
 
 GraphTools.plot(g_types[2])
@@ -793,8 +797,8 @@ print("C")
 print("Generated", c_pol)
 print("Computed: ", Utilities.polynomial2binomial(c_poly))
 print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[2])))
-
-d2, d3, dt, d_pol = d_rel(2,2,2,2,2,2)
+"""
+d2, d3, dt, d_pol = d_rel(1,1,1,1,1,1)
 d_poly = GraphRel.relpoly_binary_improved(g_types[3])
 print("D")
 print("Generated", d_pol)
