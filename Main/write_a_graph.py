@@ -769,12 +769,11 @@ for key, values in df.iterrows():
     #i +=1
 """
 
-
 g_types = GraphTools.gen_ham_3ch_types([2,2,7,2,2,7])
 
 #GraphTools.plot(g_types[2])
 
-a2, a3, at, a_pol = a_rel(2,2,7,2,2,7)
+a2, a3, at, a_pol = a_rel(3,1,1,2,1,1)
 
 #a_poly = GraphRel.relpoly_binary_improved(g_types[0])
 print("A")
@@ -798,7 +797,7 @@ print("Generated", c_pol)
 print("Computed: ", Utilities.polynomial2binomial(c_poly))
 print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[2])))
 """
-d2, d3, dt, d_pol = d_rel(2,2,7,2,2,7)
+d2, d3, dt, d_pol = d_rel(3,1,1,2,1,1)
 #d_poly = GraphRel.relpoly_binary_improved(g_types[3])
 print("D")
 print("Generated", d_pol)
