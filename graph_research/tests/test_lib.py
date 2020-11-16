@@ -1,4 +1,4 @@
-from Main.graphtbox import *
+from graph_research.core.graphtbox import *
 import time
 import os
 

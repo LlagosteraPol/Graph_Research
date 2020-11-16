@@ -1,4 +1,4 @@
-from Main.graphtbox import *
+from graph_research.core.graphtbox import *
 
 def a_rel(x1, x2, x3, x4, x5, x6):
     p = sympy.symbols('p')
@@ -591,7 +591,7 @@ session._model_changes = {}
 metadata = db.MetaData()
 graphs = db.Table('Graphs', metadata, autoload=True, autoload_with=engine)
 
-#df = DButilities.read_table(session, Table_Graph, conditions="nodes <= 8")
+#df = DButilities.read_table(session, TableGraph, conditions="nodes <= 8")
 
 """
 # Migrate table
@@ -599,29 +599,29 @@ query = db.select([graphs])
 df = pd.read_sql_query(query, engine)
 df.rename(columns={'g6_id': 'g6'}, inplace=True)
 
-df = df.astype({Table_Graph.g6_hash.name: Table_Graph.g6_hash.type.python_type,
-                Table_Graph.g6.name: Table_Graph.g6.type.python_type,
-                Table_Graph.nodes.name: Table_Graph.nodes.type.python_type,
-                Table_Graph.edges.name: Table_Graph.edges.type.python_type,
-                Table_Graph.hamiltonian.name: Table_Graph.hamiltonian.type.python_type,
-                Table_Graph.hamiltonian_cycle.name: Table_Graph.hamiltonian_cycle.type.python_type,
-                Table_Graph.graph_edges.name: Table_Graph.graph_edges.type.python_type,
-                Table_Graph.avg_polynomial.name: Table_Graph.avg_polynomial.type.python_type,
-                Table_Graph.polynomial.name: Table_Graph.polynomial.type.python_type,
-                Table_Graph.spanning_trees.name: Table_Graph.spanning_trees.type.python_type,
-                Table_Graph.edge_connectivity.name: Table_Graph.edge_connectivity.type.python_type,
-                Table_Graph.min_k2_edge_cuts.name: Table_Graph.min_k2_edge_cuts.type.python_type,
-                Table_Graph.automorphisms.name: Table_Graph.automorphisms.type.python_type,
-                Table_Graph.diameter.name: Table_Graph.diameter.type.python_type,
-                Table_Graph.probability_01.name: Table_Graph.probability_01.type.python_type,
-                Table_Graph.probability_02.name: Table_Graph.probability_02.type.python_type,
-                Table_Graph.probability_03.name: Table_Graph.probability_03.type.python_type,
-                Table_Graph.probability_04.name: Table_Graph.probability_04.type.python_type,
-                Table_Graph.probability_05.name: Table_Graph.probability_05.type.python_type,
-                Table_Graph.probability_06.name: Table_Graph.probability_06.type.python_type,
-                Table_Graph.probability_07.name: Table_Graph.probability_07.type.python_type,
-                Table_Graph.probability_08.name: Table_Graph.probability_08.type.python_type,
-                Table_Graph.probability_09.name: Table_Graph.probability_09.type.python_type})
+df = df.astype({TableGraph.g6_hash.name: TableGraph.g6_hash.type.python_type,
+                TableGraph.g6.name: TableGraph.g6.type.python_type,
+                TableGraph.nodes.name: TableGraph.nodes.type.python_type,
+                TableGraph.edges.name: TableGraph.edges.type.python_type,
+                TableGraph.hamiltonian.name: TableGraph.hamiltonian.type.python_type,
+                TableGraph.hamiltonian_cycle.name: TableGraph.hamiltonian_cycle.type.python_type,
+                TableGraph.graph_edges.name: TableGraph.graph_edges.type.python_type,
+                TableGraph.avg_polynomial.name: TableGraph.avg_polynomial.type.python_type,
+                TableGraph.polynomial.name: TableGraph.polynomial.type.python_type,
+                TableGraph.spanning_trees.name: TableGraph.spanning_trees.type.python_type,
+                TableGraph.edge_connectivity.name: TableGraph.edge_connectivity.type.python_type,
+                TableGraph.min_k2_edge_cuts.name: TableGraph.min_k2_edge_cuts.type.python_type,
+                TableGraph.automorphisms.name: TableGraph.automorphisms.type.python_type,
+                TableGraph.diameter.name: TableGraph.diameter.type.python_type,
+                TableGraph.probability_01.name: TableGraph.probability_01.type.python_type,
+                TableGraph.probability_02.name: TableGraph.probability_02.type.python_type,
+                TableGraph.probability_03.name: TableGraph.probability_03.type.python_type,
+                TableGraph.probability_04.name: TableGraph.probability_04.type.python_type,
+                TableGraph.probability_05.name: TableGraph.probability_05.type.python_type,
+                TableGraph.probability_06.name: TableGraph.probability_06.type.python_type,
+                TableGraph.probability_07.name: TableGraph.probability_07.type.python_type,
+                TableGraph.probability_08.name: TableGraph.probability_08.type.python_type,
+                TableGraph.probability_09.name: TableGraph.probability_09.type.python_type})
 df.set_index('g6_hash', inplace=True)
 
 
@@ -638,7 +638,7 @@ for i in range(6, 12):
         hashed = hashlib.md5(g6)
         df.set_value(key, 'g6_hash', hashed.hexdigest())
     df.set_index('g6_id', inplace=True)
-    DButilities.add_or_update(session, df, Table_Graph)
+    DButilities.add_or_update(session, df, TableGraph)
 """
 
 #DButilities.add_column(session, 'Graphs', 'g6_hash' ,'VARCHAR')
@@ -657,7 +657,7 @@ for i in range(25, 31):
             print(values['g6'])
         df.set_value(key, 'polynomial', str(polynomial))
     df.set_index('g6_hash', inplace=True)
-    DButilities.add_or_update(session, df, Table_Graph)
+    DButilities.add_or_update(session, df, TableGraph)
 """
 """
 # Recalculate polynomials
@@ -675,7 +675,7 @@ for i in range(11, 25):
 
         df.set_value(key, 'polynomial', str(polynomial))
     df.set_index('g6_hash', inplace=True)
-    DButilities.add_or_update(session, df, Table_Graph)
+    DButilities.add_or_update(session, df, TableGraph)
 
 session.close()
 """
@@ -694,7 +694,7 @@ for key, values in df.iterrows():
     df.set_value(key, 'polynomial', str(polynomial))
 
 df.set_index('g6_hash', inplace=True)
-DButilities.add_or_update(session, df, Table_Graph)
+DButilities.add_or_update(session, df, TableGraph)
 session.close()
 """
 """
@@ -726,7 +726,7 @@ test_dict2 = test.to_dict(orient="index")
 
 tests_dict = tests.to_dict(orient="records")
 tests_dict2 = tests.to_dict(orient="index")
-DButilities.add_or_update(session, tests, Table_Graph)
+DButilities.add_or_update(session, tests, TableGraph)
 """
 
 """
