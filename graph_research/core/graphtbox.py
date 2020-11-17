@@ -8,8 +8,7 @@ import copy
 from math import modf
 from random import *
 from collections import defaultdict
-import glob
-import time
+import sys
 
 
 #My classes
@@ -436,17 +435,17 @@ class GraphTools(object):
         :param path: path where the file will be written
         :param file_name: name of the file to write
         """
-        if os.path.isfile(path + "/Results/" + file_name + "_results_fast.txt"):
-            os.remove(path + "/Results/" + file_name + "_results_fast.txt")
+        if os.path.isfile(path + "/plain_results/" + file_name + "_results_fast.txt"):
+            os.remove(path + "/plain_results/" + file_name + "_results_fast.txt")
 
         print(GraphTools.__analytics_header_fast(),
-              file=open(path + "/Results/" + file_name + "_results_fast.txt", "a"))
+              file=open(path + "/plain_results/" + file_name + "_results_fast.txt", "a"))
 
         print("Starting analysis...")
         for graph in g_list:
             body = GraphTools.__analytics_body_fast(graph)
 
-            print(body, file=open(path + "/Results/" + file_name + "_results_fast.txt", "a"))
+            print(body, file=open(path + "/plain_results/" + file_name + "_results_fast.txt", "a"))
 
     @staticmethod
     def analyze_graphs(g_list, path, file_name, cross_points=True):
@@ -460,8 +459,8 @@ class GraphTools(object):
         """
         polynomials = list()
 
-        if os.path.isfile(path + "/Results/" + file_name + "_results.txt"):
-            os.remove(path + "/Results/" + file_name + "_results.txt")
+        if os.path.isfile(path + "/plain_results/" + file_name + "_results.txt"):
+            os.remove(path + "/plain_results/" + file_name + "_results.txt")
 
         print(GraphTools.__analytics_header(), file=open(path + "/Results/" + file_name + "_results.txt", "a"))
 
@@ -469,19 +468,19 @@ class GraphTools(object):
         for graph in g_list:
             poly, body = GraphTools.__analytics_body(graph)
 
-            print(body, file=open(path + "/Results/" + file_name + "_results.txt", "a"))
+            print(body, file=open(path + "/plain_results/" + file_name + "_results.txt", "a"))
 
             polynomials.append(poly)
 
         # Check if the computed polynomials cros in some point
         if cross_points:
-            if os.path.isfile(path + "/Results/" + file_name + "_subs.txt"):
-                os.remove(path + "/Results/" + file_name + "_subs.txt")
+            if os.path.isfile(path + "/plain_results/" + file_name + "_subs.txt"):
+                os.remove(path + "/plain_results/" + file_name + "_subs.txt")
 
             results = GraphTools.check_polynomial_cross_points(polynomials)
 
             print("\n Polynomial 1 ; Polynomial 2 ; Subtraction ; Square root ; (0,1) root?; ",
-                  file=open(path + "/Results/" + file_name + "_subs.txt", "a"))
+                  file=open(path + "/plain_results/" + file_name + "_subs.txt", "a"))
             for pol1, pol2, result, square in results:
                 keys = square.keys()
                 bad = False
@@ -492,10 +491,10 @@ class GraphTools(object):
                             bad = True
                 if bad:
                     print("\n", pol1, " ;", pol2, " ;", result, " ;", square, "; Cross ;",
-                          file=open(path + "/Results/" + file_name + "_subs.txt", "a"))
+                          file=open(path + "/plain_results/" + file_name + "_subs.txt", "a"))
                 else:
                     print("\n", pol1, " ;", pol2, " ;", result, " ;", square,
-                          file=open(path + "/Results/" + file_name + "_subs.txt", "a"))
+                          file=open(path + "/plain_results/" + file_name + "_subs.txt", "a"))
 
         print("\nDone")
 
@@ -509,8 +508,8 @@ class GraphTools(object):
         :param complete: indicates if the number of edges will be if 'True' up to complete or n/2 if 'False'
         """
         file_name = "Graph_n" + str(n_nodes)
-        in_path = os.getcwd() + "/Data/Graph6/"
-        out_path = os.getcwd() + "/Data/Results/"
+        in_path = os.getcwd() + "/data/graph6/"
+        out_path = os.getcwd() + "/data/plain_results/"
 
         # Complete graph
         if complete:
@@ -593,7 +592,7 @@ class GraphTools(object):
         :param cross_points: check if the polynomials of the graphs crosses another graph
         :param coefficients: show the coefficients of the reliability polynomial
         """
-        path = os.getcwd() + "/Data/Results/"
+        path = os.getcwd() + "/data/plain_results/"
 
         if os.path.isfile(path + file_name + "_comparison.txt"):
             os.remove(path + file_name + "_comparison.txt")
@@ -665,7 +664,7 @@ class GraphTools(object):
         """
         path = os.getcwd() + "/Data"
         if g_list is None:
-            g_list = nx.read_graph6(path + "/Graph6/" + file_name + ".g6")
+            g_list = nx.read_graph6(path + "/graph6/" + file_name + ".g6")
         # If the read graphs is only one, wrap it with a list
         if type(g_list) is not list:
             g_list = [g_list]
@@ -697,7 +696,7 @@ class GraphTools(object):
 
             for i in range(nodes, edges + 1):
                 file_name = "Graph_n" + str(nodes) + "_e" + str(i)
-                if os.path.isfile(os.getcwd() + "/Data/Graph6/" + file_name + ".g6"):
+                if os.path.isfile(os.getcwd() + "/data/graph6/" + file_name + ".g6"):
                     print("\nAnalyzing file: ", file_name)
                     GraphTools.analyze_g6_graphs(file_name, cross_points)
                     print("\nAnalyzed")
@@ -718,7 +717,7 @@ class GraphTools(object):
         :param complete: boolean that indicates if the number of edges is to complete graph or otherwise n/2
         :param cross_points: check if the polynomials of the graphs crosses another graph
         """
-        path = os.getcwd() + "/Data/Graph6/"
+        path = os.getcwd() + "/data/graph6/"
 
         for nodes in range(n_min, n_max + 1):
             # Complete graph
@@ -749,7 +748,7 @@ class GraphTools(object):
                     print("\n File ", file_name, ".g6 not found.")
 
             #TODO: Maybe input write format
-            GraphTools.data_print(data_frames, FormatType.SQL,  os.getcwd() + "/Data/DDBB/" + "Graphs_DB")
+            GraphTools.data_print(data_frames, FormatType.SQL,  os.getcwd() + "/data/databases/" + "Graphs_DB")
         print("\nDone")
 
     @staticmethod
@@ -770,17 +769,17 @@ class GraphTools(object):
             else:
                 edges = int(nodes / 2 + nodes)
 
-            print("Files location: " + os.getcwd() + "/Data/Graph6/\n")
+            print("Files location: " + os.getcwd() + "/data/graph6/\n")
 
             for i in range(nodes, edges + 1):
                 file_name = "Graph_n" + str(nodes) + "_e" + str(i) + ".g6"
 
-                if os.path.isfile(os.getcwd() + "/Data/Graph6/" + file_name):
-                    os.remove(os.getcwd() + "/Data/Graph6/" + file_name)
+                if os.path.isfile(os.getcwd() + "/data/graph6/" + file_name):
+                    os.remove(os.getcwd() + "/data/graph6/" + file_name)
 
                 print("\nCreating file: ", file_name)
                 command = "nauty-geng " + str(nodes) + " " + str(i) + ":" + str(
-                    i) + " -c > " + os.getcwd() + "/Data/Graph6/" + file_name
+                    i) + " -c > " + os.getcwd() + "/data/graph6/" + file_name
                 os.system(command)
         print("\nDone")
 
@@ -796,7 +795,7 @@ class GraphTools(object):
             g6_string = nx.to_graph6_bytes(graph)
             decoded += g6_string.decode("utf-8")[10:]
 
-        print(decoded, file=open(os.getcwd() + "/Data/Graph6/" + file_name + ".g6", "w"))
+        print(decoded, file=open(os.getcwd() + "/data/graph6/" + file_name + ".g6", "w"))
 
     @staticmethod
     def gen_random_hamiltonian(n_nodes, chords, p_new_connection=0.1):
@@ -891,12 +890,23 @@ class GraphTools(object):
         # From all non-existent possible edges, get combinations of 'ch' chords and for each combination
         # create a graph and save it into a list of graphs
         ham_graphs = list()
-        for subset in itt.combinations(elements, chords):
+        counter = 1
+        combinations_set = itt.combinations(elements, chords)
+        combinations_lst = list(combinations_set)
+        combinations_len = len(combinations_lst)
+        for subset in combinations_lst:
             new_graph = copy.deepcopy(cycle)
 
             new_graph.add_edges_from(list(subset))
 
             ham_graphs.append(new_graph)
+
+            sys.stdout.write('\r')
+            sys.stdout.flush()
+            sys.stdout.write("Generated " + str(counter) + " of " + str(combinations_len) + " graphs")
+            sys.stdout.flush()
+
+            counter += 1
 
         return ham_graphs
 
@@ -1089,7 +1099,7 @@ class GraphTools(object):
 
     @staticmethod
     def filter_isomorphisms(g_list, out_path=None):
-        path = os.getcwd() + "/Data/tmp/"
+        path = os.getcwd() + "/data/tmp/"
         file_name = "tmp_data"
 
         # Create a file containing the graphs in g6 format
@@ -2462,9 +2472,9 @@ class GraphRel(object):
                             chords.add((ham_cycle_nodes[i], node))
                             break
 
-        if os.path.isfile(os.getcwd() + "/Data/Results/" + str(len(ham_graph)) + "n_" +
+        if os.path.isfile(os.getcwd() + "/data/plain_results/" + str(len(ham_graph)) + "n_" +
                           str(len(ham_graph.edges) - len(ham_graph)) + "ch_better_than_FC.txt"):
-            os.remove(os.getcwd() + "/Data/Results/" + str(len(ham_graph)) + "n_" +
+            os.remove(os.getcwd() + "/data/plain_results/" + str(len(ham_graph)) + "n_" +
                       str(len(ham_graph.edges) - len(ham_graph)) + "ch_better_than_FC.txt")
 
         if check_polynomials:
@@ -2498,10 +2508,10 @@ class GraphRel(object):
                     str(ref_ec) + ";" +
                     str(ref_mk))
 
-        print(message, file=open(os.getcwd() + "/Data/Results/" + str(
+        print(message, file=open(os.getcwd() + "/data/plain_results/" + str(
             len(ham_graph)) + "n_" + str(len(ham_graph.edges) - len(ham_graph)) + "ch_better_than_FC.txt", "a"))
 
-        print(data, file=open(os.getcwd() + "/Data/Results/" + str(
+        print(data, file=open(os.getcwd() + "/data/plain_results/" + str(
             len(ham_graph)) + "n_" + str(len(ham_graph.edges) - len(ham_graph)) + "ch_better_than_FC.txt", "a"))
 
         if check_polynomials:
@@ -2519,7 +2529,7 @@ class GraphRel(object):
                        "Edge connectivity; "
                        "Min. k=2 edge-cut ")
 
-        print(message, file=open(os.getcwd() + "/Data/Results/" + str(
+        print(message, file=open(os.getcwd() + "/data/plain_results/" + str(
             len(ham_graph)) + "n_" + str(len(ham_graph.edges) - len(ham_graph)) + "ch_better_than_FC.txt", "a"))
 
         for chord in chords:
@@ -2543,7 +2553,7 @@ class GraphRel(object):
                                             str(poly) + "; " +
                                             str(avg_p))
 
-                                    print(data, file=open(os.getcwd() + "/Data/Results/" + str(
+                                    print(data, file=open(os.getcwd() + "/data/plain_results/" + str(
                                         len(ham_graph)) + "n_" + str(
                                         len(ham_graph.edges) - len(ham_graph)) + "ch_better_than_FC.txt", "a"))
 
@@ -2561,7 +2571,7 @@ class GraphRel(object):
                                             str(sp) + ";" +
                                             str(ec) + ";" +
                                             str(mk))
-                                    print(data, file=open(os.getcwd() + "/Data/Results/" + str(
+                                    print(data, file=open(os.getcwd() + "/data/plain_results/" + str(
                                         len(ham_graph)) + "n_" + str(len(ham_graph.edges) - len(ham_graph))
                                                           + "ch_better_than_FC.txt", "a"))
 

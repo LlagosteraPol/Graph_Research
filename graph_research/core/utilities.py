@@ -5,6 +5,7 @@ import sympy
 import numpy as np
 import itertools as itt
 
+
 class Utilities(object):
 
     @staticmethod
