@@ -4,7 +4,7 @@ from graph_research.core.ui_tools import *
 def run():
     sw = Switcher()
     create_data_dirs()  # Create data folders if not exist
-    
+
     while True:
         option = input_number \
             ("Select option:\n"
