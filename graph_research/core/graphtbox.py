@@ -784,7 +784,7 @@ class GraphTools(object):
         print("\nDone")
 
     @staticmethod
-    def gen_g6_file(g_list, file_name):
+    def gen_g6_file(g_list, file_name, path = ""):
         """
         Transform the given graphs to a Graph6 format and writte them into a .g6 file
         :param g_list: list of graphs to be converted
@@ -795,7 +795,11 @@ class GraphTools(object):
             g6_string = nx.to_graph6_bytes(graph)
             decoded += g6_string.decode("utf-8")[10:]
 
-        print(decoded, file=open(os.getcwd() + "/data/graph6/" + file_name + ".g6", "w"))
+        if path:
+            print(decoded, file=open(path + file_name + ".g6", "w"), end='')
+        else:
+            print(decoded, file=open(os.getcwd() + "/data/graph6/" + file_name + ".g6", "w"), end='')
+
 
     @staticmethod
     def gen_random_hamiltonian(n_nodes, chords, p_new_connection=0.1):
@@ -849,11 +853,12 @@ class GraphTools(object):
         return cycle
 
     @staticmethod
-    def gen_all_hamiltonian(n_nodes, chords):
+    def gen_all_hamiltonian(n_nodes, chords, write = False):
         """
         Generate all possible Hamiltonian graphs with the given nodes and chords
         :param n_nodes: Number of nodes of the Hamiltonian graphs
         :param chords: Number of chords of the Hamiltonian graphs
+        :param write: If True, the generated graphs will be written in .g6 files if false, will return them in a list.
         :return: All the possible Hamiltonian graphs
         """
         cycle = nx.cycle_graph(n_nodes)
@@ -891,6 +896,7 @@ class GraphTools(object):
         # create a graph and save it into a list of graphs
         ham_graphs = list()
         counter = 1
+        part = 0
         combinations_set = itt.combinations(elements, chords)
         combinations_lst = list(combinations_set)
         combinations_len = len(combinations_lst)
@@ -901,14 +907,44 @@ class GraphTools(object):
 
             ham_graphs.append(new_graph)
 
+            # If the size of the graphs is getting big, write them on .g6 file
+            if write and len(ham_graphs) == 100000:
+                part += 1
+                GraphTools.gen_g6_file(ham_graphs, "Hamilton_n" + str(n_nodes) + "_ch" + str(chords)
+                                       + "_part" + str(part), os.getcwd() + "/data/tmp/")
+                ham_graphs.clear()
+
             sys.stdout.write('\r')
             sys.stdout.flush()
             sys.stdout.write("Generated " + str(counter) + " of " + str(combinations_len) + " graphs")
             sys.stdout.flush()
 
             counter += 1
+        sys.stdout.write("\n")
 
-        return ham_graphs
+        if write:
+            if part == 1:
+                GraphTools.gen_g6_file(ham_graphs, "Hamilton_n" + str(n_nodes) + "_ch" + str(chords))
+                ham_graphs.clear()
+
+            else:
+                if ham_graphs:
+                    GraphTools.gen_g6_file(ham_graphs, "Hamilton_n" + str(n_nodes) + "_ch" + str(chords)
+                                           + "_part" + str(part), os.getcwd() + "/data/tmp/")
+
+                with open(os.getcwd() + "/data/graph6/Hamilton_n" + str(n_nodes) + "_ch" + str(chords) + ".g6", "w") as outfile:
+                    for i in range(1, part + 1):
+                        filename = os.getcwd() + "/data/tmp/Hamilton_n" + str(n_nodes) + "_ch" + str(chords) \
+                                   + "_part" + str(i) + ".g6"
+                        with open(filename) as infile:
+                            outfile.write(infile.read())
+                for f in os.listdir(os.getcwd() + "/data/tmp/"):
+                    if not f.endswith(".g6"):
+                        continue
+                    os.remove(os.path.join(os.getcwd() + "/data/tmp/", f))
+
+        if not write:
+            return ham_graphs
 
     @staticmethod
     def gen_all_3ch_hamiltonian_opt(n_nodes, out_path=None):

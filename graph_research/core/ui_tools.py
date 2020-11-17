@@ -125,8 +125,7 @@ class Switcher(object):
         n_nodes = int(input_number("Input number of nodes:\n"))
         chords = int(input_number("Input number of chords:\n"))
 
-        g_list = GraphTools.gen_all_hamiltonian(n_nodes, chords)
-        GraphTools.gen_g6_file(g_list, "Hamilton_n" + str(n_nodes) + "_ch" + str(chords))
+        GraphTools.gen_all_hamiltonian(n_nodes, chords, True)
 
     def option_gen_fair_cake(self):
         print("This option will give all the fair cake graph constructions with the given 'n' nodes ")
