@@ -8,13 +8,13 @@ Realiability Focused Tools
 Introduction
 ============
 
-This project provides several algorithms and methods that creates, process and analyze graphs. Although the project is
-focused on the Realiability Polynomial, it also gives useful tools to work with graphs.
+This project provides several algorithms and methods that create, process, and analyze graphs. Although the project is
+focused on the Reliability Polynomial, it also gives useful tools to work with graphs.
 
-Internally, the format of the graphs used inside the methods are Networkx graph objects. Externally, in order to write
-and read them, the most used format is graph6 stored into '.g6' files. The resulting data of the analysis, is stored
+Internally, the format of the graphs used inside the methods is Networkx graph objects. Externally, in order to write
+and read them, the most used format is graph6 stored into '.g6' files. The resulting data of the analysis is stored
 in .txt or into a SQLite database called 'Graphs_DB.db'. If the output format is desired to be another, in 'graphbox.py'
-file there is the method 'data_print()' which stores the given data (dataframe) into CSV, Json, Html or excel
+file there is the method 'data_print()' which stores the given data (dataframe) into CSV, JSON, Html or excel
 (experimental), as well as SQLite.
 
 
