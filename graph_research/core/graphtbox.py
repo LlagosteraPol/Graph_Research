@@ -662,9 +662,13 @@ class GraphTools(object):
         :param g_list: list of graphs to be analyzed
         :param fast: faster but with less information analysis
         """
-        path = os.getcwd() + "/Data"
+        path = os.getcwd() + "/data"
+        file_path = path + "/graph6/" + file_name + ".g6"
+
+        # If the list of graphs are not provided, then read from file
         if g_list is None:
-            g_list = nx.read_graph6(path + "/graph6/" + file_name + ".g6")
+            g_list = nx.read_graph6(file_path)
+
         # If the read graphs is only one, wrap it with a list
         if type(g_list) is not list:
             g_list = [g_list]
@@ -707,11 +711,62 @@ class GraphTools(object):
         print("\nDone")
 
     @staticmethod
-    def g6_files_data_analysis(n_min, n_max, max_chords=0, binomial_format=True, fast=False):
+    def g6_file_data_analysis2db(file_name, n_lines=-1):
+        """
+        This method can work with LARGE files. It will check different properties of graphs and write the analysis into
+        a SQLite database called 'Graphs_DB'.
+        :param file_name: name of the file (without extension)
+        :param n_lines: optional parameter which gives the number of lines of the graph
+        """
+        data_frames = None
+        path = os.getcwd() + "/data/graph6/"
+        file_path = path + file_name + ".g6"
+
+        print("\nAnalyzing file: ", file_name)
+
+        # If is a 'large' (1Mb) file, then process it in chunks
+        if os.stat(file_path).st_size > 1000:
+            counter = 1
+            with open(file_path) as input_file:
+                for g6_str in input_file:
+                    g = nx.from_graph6_bytes(g6_str.strip().encode())
+                    if data_frames is None:
+                        data_frames = GraphTools.data_analysis(g, True, False)
+                    else:
+                        data_frames = data_frames.append(GraphTools.data_analysis(g, True, False))
+
+                    counter += 1
+                    # Write to database and release space from RAM
+                    if counter % 1000 == 0:
+                        GraphTools.data_print(data_frames, FormatType.SQL,
+                                              os.getcwd() + "/data/databases/" + "Graphs_DB")
+                        data_frames = None
+
+                    sys.stdout.write('\r')
+                    sys.stdout.flush()
+                    sys.stdout.write("Analyzed " + str(counter) + " of " + str(n_lines) + " graphs")
+                    sys.stdout.flush()
+            sys.stdout.write('\n')
+
+        else:
+            g_list = nx.read_graph6(file_path)
+            if type(g_list) is not list:
+                g_list = [g_list]
+            for g in g_list:
+                if data_frames is None:
+                    data_frames = GraphTools.data_analysis(g, True, False)
+                else:
+                    data_frames = data_frames.append(GraphTools.data_analysis(g, True, False))
+
+            GraphTools.data_print(data_frames, FormatType.SQL, os.getcwd() + "/data/databases/" + "Graphs_DB")
+
+        print("\nDone")
+
+    @staticmethod
+    def g6_files_data_analysis2db(n_min, n_max, max_chords=0, binomial_format=True, fast=False):
         """
         This method will check different properties of graphs from n_min to n_max vertices with n/2 edges or up to
-        complete graph if indicated. All the results will be written into a .txt file that could be easily converted to
-        a calc sheet.
+        complete graph if indicated. All the results will be written into a SQLite database called 'Graphs_DB'.
         :param n_min: minimum nodes
         :param n_max: maximum nodes
         :param complete: boolean that indicates if the number of edges is to complete graph or otherwise n/2

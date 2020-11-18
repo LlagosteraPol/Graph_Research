@@ -24,7 +24,8 @@ def run():
 
              "12) Analyze 3 chords hamiltonian graphs.\n"
 
-             "13) Testing: Analysis and print data.\n"
+             "13) Testing: Analyze the graphs inside a .g6 file and write results to database.\n"
+             "14) Testing: Analyze the graphs inside a bunch of .g6 files and write results to database.\n"
              "0) Exit.\n")
 
         if option == 1:
@@ -64,7 +65,10 @@ def run():
             sw.option_gen_all_3ch_hamiltonian_opt()
 
         elif option == 13:
-            sw.option_g6_files_data_analysis()
+            sw.option_g6_file_data_analysis2db()
+
+        elif option == 14:
+            sw.option_g6_files_data_analysis2db()
 
         elif option == 0:
             break

@@ -23,6 +23,18 @@ def create_data_dirs():
         os.makedirs(path + "/data/tmp")
 
 
+def file_len(file_path):
+    """
+    Gives the number of lines of the file
+    :param file_path: path to the file
+    :return: number of files
+    """
+    with open(file_path) as f:
+        for i, l in enumerate(f):
+            pass
+    return i + 1
+
+
 def input_g6_file(message):
     """
     Simple function to ask the user to input a .g6 file name.
@@ -39,6 +51,22 @@ def input_g6_file(message):
             if type(g_list) is not list:
                 g_list = [g_list]
             return g_list, file_name
+
+        else:
+            print("The file ", file_name, " doesn't exist, please make sure that is in the folder ", path)
+
+
+def input_file(message, path):
+    """
+        Simple function to check if the input file exist.
+        :param path: path to the file
+        :param message: Message that will be shown to the user.
+        :return: the given file name
+        """
+    while True:
+        file_name = input(message + "\n")
+        if os.path.isfile(path + file_name + ".g6"):
+            return file_name
 
         else:
             print("The file ", file_name, " doesn't exist, please make sure that is in the folder ", path)
@@ -362,7 +390,17 @@ class Switcher(object):
         #GraphTools.data_print(df, FormatType.Excel, os.getcwd() + "/data/databases/" + "DB_file_name")
         """
 
-    def option_g6_files_data_analysis(self):
+    def option_g6_file_data_analysis2db(self):
+        print("This option will analyze the graphs inside a .g6 file and save the results into a SQLite data base "
+              "called 'Graphs_DB'")
+
+        path = os.getcwd() + "/data/graph6/"
+        file_name = input_file("Enter the name of the .g6 file.", path)
+        n_lines = file_len(path + file_name + ".g6")
+
+        GraphTools.g6_file_data_analysis2db(file_name, n_lines)
+
+    def option_g6_files_data_analysis2db(self):
         print("This option will analyze the graphs in .g6 format within a range of ['n_min', 'n_max] nodes, "
               "and e=n/2 (N) or e=n(n − 1)/2 (Y) edges and save the results into a SQLite data base called 'Graphs_DB'")
         n_min = int(input_number("Input minimum nodes:\n"))
@@ -372,6 +410,6 @@ class Switcher(object):
         chords = int(input_number("Input maximum number of chords, or 0 for complete graph:\n"))
 
         time_start = time.process_time()
-        GraphTools.g6_files_data_analysis(n_min, n_max, chords)
+        GraphTools.g6_files_data_analysis2db(n_min, n_max, chords)
         time_elapsed = (time.process_time() - time_start)
         print("\nTime: ", time_elapsed)
