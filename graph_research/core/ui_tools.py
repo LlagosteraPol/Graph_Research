@@ -396,9 +396,12 @@ class Switcher(object):
 
         path = os.getcwd() + "/data/graph6/"
         file_name = input_file("Enter the name of the .g6 file.", path)
+        fast = ask_yes_no("Do you want to execute a fast but with less information analysis?")
+
         n_lines = file_len(path + file_name + ".g6")
 
-        GraphTools.g6_file_data_analysis2db(file_name, n_lines)
+        GraphTools.g6_file_data_analysis2db(file_name, fast, n_lines)
+
 
     def option_g6_files_data_analysis2db(self):
         print("This option will analyze the graphs in .g6 format within a range of ['n_min', 'n_max] nodes, "

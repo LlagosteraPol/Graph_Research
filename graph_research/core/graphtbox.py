@@ -9,7 +9,7 @@ from math import modf
 from random import *
 from collections import defaultdict
 import sys
-
+import time
 
 #My classes
 from .enums import *
@@ -185,15 +185,15 @@ class GraphTools(object):
 
         if fast:
             d = {'g6_hash': hashlib.md5(g6_bytes).hexdigest(),
-                 'g6': nx.to_graph6_bytes(graph, nodes=None, header=False),
+                 'g6': g6_bytes.decode(),
                  'nodes': str(len(graph.nodes)),
                  'edges': str(len(graph.edges)),
                  'hamiltonian': False if ham_cycle is None else True,
-                 'hamiltonian_cycle': ham_cycle,
-                 'graph_edges': sorted(graph.edges()),
+                 'hamiltonian_cycle': str(ham_cycle),
+                 'graph_edges': str(sorted(graph.edges())),
                  'spanning_trees': GraphTools.spanning_trees_count(graph),
                  'edge_connectivity': nx.edge_connectivity(graph),
-                 'min_k2_edge_cut': len(GraphTools.minimum_k_edges_cutsets(graph, 2)),
+                 'min_k2_edge_cuts': len(GraphTools.minimum_k_edges_cutsets(graph, 2)),
                  'automorphisms': GraphTools.automorphism_group_number(graph),
                  'diameter': nx.diameter(graph)}
 
@@ -711,7 +711,7 @@ class GraphTools(object):
         print("\nDone")
 
     @staticmethod
-    def g6_file_data_analysis2db(file_name, n_lines=-1):
+    def g6_file_data_analysis2db(file_name, fast = False, n_lines=-1):
         """
         This method can work with LARGE files. It will check different properties of graphs and write the analysis into
         a SQLite database called 'Graphs_DB'.
@@ -731,9 +731,14 @@ class GraphTools(object):
                 for g6_str in input_file:
                     g = nx.from_graph6_bytes(g6_str.strip().encode())
                     if data_frames is None:
-                        data_frames = GraphTools.data_analysis(g, True, False)
+                        time_start = time.process_time()
+                        data_frames = GraphTools.data_analysis(g, False if fast else True, True if fast else False)
+                        time_elapsed = (time.process_time() - time_start)
+                        print("\nTime: ", time_elapsed)
+
                     else:
-                        data_frames = data_frames.append(GraphTools.data_analysis(g, True, False))
+                        data_frames = data_frames.append(GraphTools.data_analysis(g, False if fast else True,
+                                                                                  True if fast else False))
 
                     counter += 1
                     # Write to database and release space from RAM
