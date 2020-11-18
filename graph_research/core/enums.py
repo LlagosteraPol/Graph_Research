@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class GraphType(Enum):
     Tree = 1
     PureCycle = 2

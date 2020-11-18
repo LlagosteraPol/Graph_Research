@@ -1,6 +1,8 @@
-import sympy
+import glob
 
+# Project classes
 from graph_research.core.graphtbox import *
+
 
 class Benchmarks(object):
 

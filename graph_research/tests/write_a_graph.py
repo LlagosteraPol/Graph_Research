@@ -1,5 +1,10 @@
 from graph_research.core.graphtbox import *
 
+"""
+Purely a testing file to generate manually graphs
+"""
+
+
 def a_rel(x1, x2, x3, x4, x5, x6):
     p = sympy.symbols('p')
 

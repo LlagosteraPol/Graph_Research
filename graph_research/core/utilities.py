@@ -1,9 +1,10 @@
-from math import factorial
-from collections import OrderedDict
 from collections import Counter
-import sympy
-import numpy as np
+from collections import OrderedDict
+from math import factorial
+
 import itertools as itt
+import numpy as np
+import sympy
 
 
 class Utilities(object):

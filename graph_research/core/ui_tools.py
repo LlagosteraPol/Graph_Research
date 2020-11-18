@@ -1,9 +1,4 @@
-import os
-import networkx as nx
-import time
-
-#My classes
-from .enums import *
+# Project classes
 from graph_research.core.graphtbox import *
 
 
@@ -134,6 +129,9 @@ def ask_yes_no(message):
     return True if answer == 'y' else False
 
 class Switcher(object):
+    """
+    This class defines the methods used by each option of the ui.
+    """
 
     def option_gen_g6_graphs(self):
         print("This option will generate graphs within the range of ['n_min', 'n_max] nodes "
@@ -234,7 +232,7 @@ class Switcher(object):
                 else:
                     print("\n File ", file_name, ".g6 not found.")
 
-        GraphTools.analyze_graphs(g_list, path, "Multiple_opt_graphs")
+        GraphTools.analyze_graphs(g_list, path, "Multiple_opt_graphs", False)
 
         print("\nDone")
 
@@ -261,8 +259,8 @@ class Switcher(object):
 
     def option_compare_best_reliabilities(self):
         print("This option will filter the best Reliability Polynomial of General graphs and the best of the"
-              "Hamiltonian ones. Then will analyze and compare them. Notice that the graphs must be written in the"
-              "same .g6 file and they must have the same nodes and the same edges")
+              "Hamiltonian ones. Then will analyze and compare them. \nNotice that the graphs must be written in the"
+              "same .g6 file and they must have the same nodes and the same edges\n")
 
         g_list, file_name = input_g6_file("Input the .g6 file containing the graphs.")
         filtered_ham, filtered_others = GraphTools.filter_hamiltonian_general_graphs(g_list)
@@ -281,7 +279,7 @@ class Switcher(object):
 
     def option_range_compare_best_reliabilities(self):
         print("This option will filter the best Reliability Polynomial of General graphs and the best of "
-              "Hamiltonian ones. Then will analyze and compare them. This filter will be applied to the graphs "
+              "Hamiltonian ones. Then will analyze and compare them. \nThis filter will be applied to the graphs "
               "(written in .g6 format) within a range of ['n_min', 'n_max] nodes, and e=n/2 (N) or e=n(n − 1)/2 (Y) "
               "edges")
 
@@ -346,7 +344,8 @@ class Switcher(object):
 
     def option_gen_all_3ch_hamiltonian_opt(self):
         print("This option will analyze hamiltonian graphs with a maximum of 3 chords (e=n+3). At least one of the chords "
-              "will be diametrical and the other 2 will cross it.")
+              "will be diametrical and the other 2 will cross it. The .g6 file containing the diametral graphs must be created"
+              "previously with name 'Diametral_n<number of nodes>_ch<number of chords>.g6")
 
         n_min = int(input_number("Input minimum nodes:\n"))
         n_max = int(input_number("Input maximum nodes:\n"))

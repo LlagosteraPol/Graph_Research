@@ -1,17 +1,18 @@
-import os
-import hashlib
-import networkx as nx
-from networkx.algorithms import isomorphism
-from sympy import roots
-import matplotlib.pyplot as plt
-import copy
-from math import modf
-from random import *
 from collections import defaultdict
+from math import modf
+from networkx.algorithms import isomorphism
+from random import *
+from sympy import roots
+
+import copy
+import hashlib
+import matplotlib.pyplot as plt
+import networkx as nx
+import os
 import sys
 import time
 
-#My classes
+# Project classes
 from .enums import *
 from graph_research.core.db_tools import *
 from .utilities import *
@@ -177,6 +178,13 @@ class GraphTools(object):
 
     @staticmethod
     def data_analysis(graph, binomial_format=False, fast=False):
+        """
+        Analyze different characteristics of the given graph and returns them into a dataframe.
+        :param graph: networkx graph
+        :param binomial_format: if True, gives the reliability polynomial in a binomial format
+        :param fast: if True, doesn't calculate the reliability polynomial
+        :return: dataframe with the analyzed data
+        """
         p = sympy.symbols("p")
         ham_cycle = GraphTools.hamilton_cycle(graph)
         g6_bytes = nx.to_graph6_bytes(graph, nodes=None, header=False)
@@ -239,22 +247,28 @@ class GraphTools(object):
         return df
 
     @staticmethod
-    def data_print(data, write_fomat, path):
+    def data_print(dataframe, write_fomat, path):
+        """
+        Transforms the given data to the desired data file and stores it into the specified path.
+        :param dataframe: dataframe containing the data to transform
+        :param write_fomat: FormatType class enum specifiying the format to convert the data.
+        :param path: Path to store the file
+        """
 
         if write_fomat == FormatType.CSV:
-            data.to_csv(path + ".csv")
+            dataframe.to_csv(path + ".csv")
 
         elif write_fomat == FormatType.JSON:
-            data.to_json(path + ".json")
+            dataframe.to_json(path + ".json")
 
         elif write_fomat == FormatType.HTML:
-            data.to_html(path + ".html")
+            dataframe.to_html(path + ".html")
 
         elif write_fomat == FormatType.Excel:
             # Create a Pandas Excel writer using XlsxWriter as the engine.
             writer = pd.ExcelWriter(path + ".xlsx", engine='xlsxwriter')
             # Convert the dataframe to an XlsxWriter Excel object.
-            data.to_excel(writer, sheet_name='Sheet1')
+            dataframe.to_excel(writer, sheet_name='Sheet1')
             # Close the Pandas Excel writer and output the Excel file.
             writer.save()
 
@@ -262,11 +276,17 @@ class GraphTools(object):
             engine = db.create_engine('sqlite:///' + path + ".db", echo=False)
             Session = db.orm.session.sessionmaker(bind=engine)
             session = Session()
-            DButilities.add_or_update(session, data, TableGraph)
+            DButilities.add_or_update(session, dataframe, TableGraph)
             session.close()
 
     @staticmethod
     def data_read(read_format, path):
+        """
+        Read data and converts it into dataframe
+        :param read_format: Format of the data to read
+        :param path: Path where is stored the data file
+        :return: Dataframe with the read data
+        """
 
         if read_format == FormatType.CSV:
             return pd.read_csv(path)
@@ -462,7 +482,7 @@ class GraphTools(object):
         if os.path.isfile(path + "/plain_results/" + file_name + "_results.txt"):
             os.remove(path + "/plain_results/" + file_name + "_results.txt")
 
-        print(GraphTools.__analytics_header(), file=open(path + "/Results/" + file_name + "_results.txt", "a"))
+        print(GraphTools.__analytics_header(), file=open(path + "/plain_results/" + file_name + "_results.txt", "a"))
 
         print("Starting analysis...")
         for graph in g_list:
@@ -496,7 +516,7 @@ class GraphTools(object):
                     print("\n", pol1, " ;", pol2, " ;", result, " ;", square,
                           file=open(path + "/plain_results/" + file_name + "_subs.txt", "a"))
 
-        print("\nDone")
+        print("Results stored at " + path + "/plain_results/" + file_name + "_results.txt")
 
     @staticmethod
     def reliability_polynomial_optimal_graphs(n_nodes, complete):
@@ -579,7 +599,7 @@ class GraphTools(object):
             else:
                 print("The file ", file_name, " doesn't exist, please make sure that is in the folder ", in_path)
 
-        print("\nDone")
+            print("\nResults stored at "+out_path + "Opt_General_" + file_name + ".txt")
 
     @staticmethod
     def compare_graphs(file_name, graph1, graph_bunch, cross_points=True, coefficients=False):
@@ -731,15 +751,11 @@ class GraphTools(object):
                 for g6_str in input_file:
                     g = nx.from_graph6_bytes(g6_str.strip().encode())
                     if data_frames is None:
-                        time_start = time.process_time()
                         data_frames = GraphTools.data_analysis(g, False if fast else True, True if fast else False)
-                        time_elapsed = (time.process_time() - time_start)
-                        print("\nTime: ", time_elapsed)
 
                     else:
                         data_frames = data_frames.append(GraphTools.data_analysis(g, False if fast else True,
                                                                                   True if fast else False))
-
                     counter += 1
                     # Write to database and release space from RAM
                     if counter % 1000 == 0:
@@ -774,8 +790,9 @@ class GraphTools(object):
         complete graph if indicated. All the results will be written into a SQLite database called 'Graphs_DB'.
         :param n_min: minimum nodes
         :param n_max: maximum nodes
-        :param complete: boolean that indicates if the number of edges is to complete graph or otherwise n/2
-        :param cross_points: check if the polynomials of the graphs crosses another graph
+        :param max_chords: maximum number of chords
+        :param binomial_format: if True, gives the reliability polynomial in a binomial format
+        :param fast: if True, doesn't calculate the reliability polynomial
         """
         path = os.getcwd() + "/data/graph6/"
 
@@ -796,7 +813,7 @@ class GraphTools(object):
                     g_list = nx.read_graph6(path + file_name + ".g6")
                     if type(g_list) is not list:
                         g_list = [g_list]
-                    #TODO: Improve efficiency
+                    # TODO: Improve efficiency
                     for g in g_list:
                         if data_frames is None:
                             data_frames = GraphTools.data_analysis(g, binomial_format, fast)
@@ -807,7 +824,7 @@ class GraphTools(object):
                 else:
                     print("\n File ", file_name, ".g6 not found.")
 
-            #TODO: Maybe input write format
+            # TODO: Maybe input write format
             GraphTools.data_print(data_frames, FormatType.SQL,  os.getcwd() + "/data/databases/" + "Graphs_DB")
         print("\nDone")
 
@@ -844,11 +861,12 @@ class GraphTools(object):
         print("\nDone")
 
     @staticmethod
-    def gen_g6_file(g_list, file_name, path = ""):
+    def gen_g6_file(g_list, file_name, path=""):
         """
-        Transform the given graphs to a Graph6 format and writte them into a .g6 file
+        Transform the given graphs to a Graph6 format and write them into a .g6 file
         :param g_list: list of graphs to be converted
         :param file_name: name of the file containing the given graphs in Graph6 format
+        :param path: if given, the file will be stored here
         """
         decoded = ""
         for graph in g_list:
@@ -860,15 +878,14 @@ class GraphTools(object):
         else:
             print(decoded, file=open(os.getcwd() + "/data/graph6/" + file_name + ".g6", "w"), end='')
 
-
     @staticmethod
     def gen_random_hamiltonian(n_nodes, chords, p_new_connection=0.1):
         """
         Generate a random Hamiltonian graph with the nodes and chords provided
-        :param n_nodes: Number of nodes of the graph
-        :param chords: Number of chords of the graph
+        :param n_nodes: number of nodes of the graph
+        :param chords: number of chords of the graph
         :param p_new_connection: probability to add new edge
-        :return: A Hamiltonian graph
+        :return: a Hamiltonian graph
         """
 
         cycle = nx.cycle_graph(n_nodes)
@@ -913,13 +930,13 @@ class GraphTools(object):
         return cycle
 
     @staticmethod
-    def gen_all_hamiltonian(n_nodes, chords, write = False):
+    def gen_all_hamiltonian(n_nodes, chords, write=False):
         """
         Generate all possible Hamiltonian graphs with the given nodes and chords
-        :param n_nodes: Number of nodes of the Hamiltonian graphs
-        :param chords: Number of chords of the Hamiltonian graphs
-        :param write: If True, the generated graphs will be written in .g6 files if false, will return them in a list.
-        :return: All the possible Hamiltonian graphs
+        :param n_nodes: number of nodes of the Hamiltonian graphs
+        :param chords: number of chords of the Hamiltonian graphs
+        :param write: if True, the generated graphs will be written in .g6 files if false, will return them in a list.
+        :return: all the possible Hamiltonian graphs
         """
         cycle = nx.cycle_graph(n_nodes)
         n_edges = len(cycle.edges)
@@ -1011,9 +1028,9 @@ class GraphTools(object):
         """
         Generate all possible Hamiltonian graphs with the given nodes and chords. The method is Optimized,
         this means, compute the first chord (diagonal), chords of length more than n/2 and maximum grade = 3
-        :param n_nodes: Number of nodes of the Hamiltonian graphs
-        :param out_path: Optional, path for writing the generated graphs in g6 format
-        :return: All the possible Hamiltonian graphs or if out_path is given, a file containing a g6
+        :param n_nodes: number of nodes of the Hamiltonian graphs
+        :param out_path: optional, path for writing the generated graphs in g6 format
+        :return: all the possible Hamiltonian graphs or if out_path is given, a file containing a g6
         format of the graphs
         """
         cycle = nx.cycle_graph(n_nodes)
@@ -1061,6 +1078,11 @@ class GraphTools(object):
 
     @staticmethod
     def gen_ham_3ch_types(cpaths):
+        """
+        Given a list of c-paths, generates the 4 types of a hamiltonian cycles with 3 chords.
+        :param cpaths: list of c-paths
+        :return: list of the 4 hamiltonian graph types
+        """
 
         total_len = 0
         for path_len in cpaths:
@@ -1195,6 +1217,11 @@ class GraphTools(object):
 
     @staticmethod
     def filter_isomorphisms(g_list, out_path=None):
+        """
+        Given a list of Networkx graphs, removes all the isomorphic.
+        :param g_list: list of Networkx graphs
+        :param out_path: path to store the filtered graphs in .g6 format.
+        """
         path = os.getcwd() + "/data/tmp/"
         file_name = "tmp_data"
 
@@ -1242,8 +1269,8 @@ class GraphTools(object):
         n: Number of eigenvalues of the Laplacian matrix of G
         x_i: The 'i' Eigenvalue
 
-        :param g: Networkx Graph
-        :return: Number of spanning trees of the given graph
+        :param g: networkx Graph
+        :return: number of spanning trees of the given graph
         """
         laplacian = nx.laplacian_matrix(g)  # Laplacian matrix of the given graph
 
@@ -1294,7 +1321,7 @@ class GraphTools(object):
     def get_cycles_edges(g):
         """
         Determine the edges of the inner cycles of the given graph 'g'.
-        :param g: Networkx graph.
+        :param g: networkx graph.
         :return: <list> the edges of the inner cylces.
         """
         g_nd = nx.Graph(g)  # Make a no multicycle and non directed graph copy
@@ -1330,7 +1357,7 @@ class GraphTools(object):
         """
         This function diferentiates the edges that are part of the 'tree' of the graph
         and the edges that are part of a cycle
-        :param g - Networkx Graph
+        :param g - networkx Graph
         :return:
             bal_pedges - <tuple> If balanced parallel edges, <True, number_of_parallel_edges>,
                             otherwise <False, -1>
@@ -1376,7 +1403,7 @@ class GraphTools(object):
     def get_a_common_edge(g):
         """
         Get a common edge between two cycles if exists
-        :param g: Networkx graph
+        :param g: networkx graph
         :return: common_edge - common edge <set> or None if doesn't exist any
         """
         h = nx.Graph(g)
@@ -1417,9 +1444,9 @@ class GraphTools(object):
     def get_random_treecyc(tn, cn_max):
         """
         Gives a random Netwokx Tree Graph
-        :param tn: Tree Nodes
-        :param cn_max: Must be at least 3
-        :return: Random Netwokx Tree Graph
+        :param tn: tree Nodes
+        :param cn_max: must be at least 3
+        :return: random netwokx Tree Graph
         """
         tree = nx.random_tree(tn)
         cp_tree = copy.deepcopy(tree)
@@ -1472,8 +1499,8 @@ class GraphTools(object):
     def get_all_connected_graphs(g):
         """
         For each subset of k disconnected edges, gives all the connected graphs.
-        :param g: Networkx graph
-        :return: Dictionary where <key>: number of deleted edges, <value> list of connected graphs
+        :param g: networkx graph
+        :return: dictionary where <key>: number of deleted edges, <value> list of connected graphs
         """
         connected_graphs = {}
         l_edges = list(g.edges())
@@ -1564,7 +1591,6 @@ class GraphTools(object):
 
         return ordered_cycles, other_graphs
 
-    # TODO: Optimize algorithm time
     @staticmethod
     def get_sub_graphs(g, filter_ordered_cycles):
         """
@@ -1575,6 +1601,7 @@ class GraphTools(object):
         the graphs are marked as "others"
         :return: Edges of the tree part, list of pure cycles, list of merged cycles
         """
+        # TODO: Optimize algorithm time
         all_subgraphs = list()
 
         bal_pedges, tree_edges, cycle_edges, total_edges = GraphTools.get_detailed_graph_edges(g)
@@ -1696,8 +1723,9 @@ class GraphTools(object):
 
             for j in range(i + 1, len(polynomials)):
                 tmp_res = prev - polynomials[j]
-
-                results.append((prev, polynomials[j], tmp_res, roots(tmp_res)))
+                #rts = roots(tmp_res) # TODO: Error in roots "convergence to root failed; try n < 15 or maxsteps > 50"
+                #results.append((prev, polynomials[j], tmp_res, rts))
+                results.append((prev, polynomials[j], tmp_res))
 
         return results
 
@@ -1802,8 +1830,8 @@ class GraphRel(object):
     def relpoly_binary_basic(g):
         """
         Provides the reliability polynomial using the basic contraction-deletion algorithm
-        :param g: Graph to calculate
-        :return: Reliability polynomial
+        :param g: graph to calculate
+        :return: reliability polynomial
         """
         h = nx.MultiGraph(g)
         rel = GraphRel.__recursive_basic(h)
@@ -1815,8 +1843,8 @@ class GraphRel(object):
     def __recursive_basic(cls, g):
         """
         Recursive contraction-deletion algorithm method that calculates the reliability polynomial
-        :param g: Graph to calculate
-        :return: Reliability polynomial
+        :param g: graph to calculate
+        :return: reliability polynomial
         """
         p = sympy.symbols('p')
 
@@ -1841,9 +1869,9 @@ class GraphRel(object):
     def relpoly_binary_improved(g, filter_depth=0):
         """
         Provides the Reliability Polynomial using an improved contraction-deletion algorithm
-        :param g: Graph to calculate
+        :param g: graph to calculate
         :param filter_depth: number of subgraphs that will be analyzed to determine if they're ordered cycles
-        :return: Reliability polynomial
+        :return: reliability polynomial
         """
         rel = GraphRel.__recursive_improved(nx.MultiGraph(g), filter_depth)
         # rel = GraphRel._recursive_improved_old(nx.MultiGraph(g))
@@ -1856,9 +1884,9 @@ class GraphRel(object):
         This is the improved contraction-deletion algorithm. In each recursion, if there exist some method
         that can retrieve the Reliability Polynomial directly or with less cost than another recursion,
         will retrieve it and stop the recursion in that generated sub-graph.
-        :param g: Networkx graph
+        :param g: networkx graph
         :param filter_depth: number of subgraphs that will be analyzed to determine if they're ordered cycles
-        :return: The reliability Polynomial of the given graph or another execution of the method.
+        :return: the reliability Polynomial of the given graph or another execution of the method.
         """
         # print("---------Input graph-----")
         # AdjMaBox.plot(g)
@@ -1953,9 +1981,9 @@ class GraphRel(object):
     def relpoly_treecyc(g, cycle_edges):
         """
         Get the Reliability Polynomial of a tree+cycles graph shape (no multiedge).
-        :param g: Networkx graph.
+        :param g: networkx graph.
         :param cycle_edges: <list> (list), list of the edges of each cycle of the graph.
-        :return: Reliability Polynomial
+        :return: reliability polynomial
         """
         p = sympy.symbols('p')
 
@@ -2226,7 +2254,7 @@ class GraphRel(object):
             # if polynomial == 2*(-p + 1)**3 - 3*(-p + 1)**2 + 1:  # TODO: Debug test
             #   debug = 1
 
-        # return sympy.Poly(polynomial)  # TODO: Check if works
+        # return sympy.Poly(polynomial)  # TODO: Check if also works properly
         return polynomial
 
     @staticmethod
@@ -2237,8 +2265,8 @@ class GraphRel(object):
         :param bal_pedges: <tuple> (bool, int); <bool> if is parallel, <int> number of parallel edges.
         :param tree_edges: <list> of the edges of the tree part of the graph.
         :param cycle_edges: <list> (list), list of the edges of each cycle of the graph.
-        :param g: Graph (only for debugging)
-        :return: Reliability polynomial of the graph
+        :param g: graph (only for debugging)
+        :return: reliability polynomial of the graph
         """
         if tree_edges:
             polynomial = GraphRel.relpoly_multitree(bal_pedges, tree_edges)
@@ -2297,10 +2325,10 @@ class GraphRel(object):
         for n >= 4.
         Equation extracted from'On maximal 3-restricted edge connectivity and reliability analysis
         of hypercube networks - Jianping Ou'
-        :param dimension: Dimension of the hypercube
+        :param dimension: dimension of the hypercube
         :param t_edges: Graph edges
-        :param p: Reliability of the edges
-        :return: Reliability polynomial of the first 3n - 5 coefficients
+        :param p: reliability of the edges
+        :return: reliability polynomial of the first 3n - 5 coefficients
         """
         rel = 0
         for h in range(1, t_edges):
@@ -2316,10 +2344,10 @@ class GraphRel(object):
         This method provides the first edge-cuts of any hypercube of dimension >= 4
         Equation extracted from'On maximal 3-restricted edge connectivity and reliability analysis
         of hypercube networks - Jianping Ou'
-        :param dimension: Dimension of the hypercube
-        :param t_edges: Graph edges
-        :param h: Number of edges crossing a cut 'C' (size of the cut)
-        :return: Number of edge-cuts with size h
+        :param dimension: dimension of the hypercube
+        :param t_edges: graph edges
+        :param h: number of edges crossing a cut 'C' (size of the cut)
+        :return: number of edge-cuts with size h
         """
 
         if h < dimension:
@@ -2344,11 +2372,11 @@ class GraphRel(object):
         """
         This method performs a series reduction. See 'A Linear-Time Algorithm For Computing K-Terminal
         Reliability In Series-Parallel Networks, A. Satyanarayana and R. Kevin Wood
-        :param g: Networkx Graph to be reduced
+        :param g: networkx Graph to be reduced
         :param src_node: Set the source node which the algorithm will start with.
-        :return: Reducted Graph
+        :return: reducted Graph
         """
-        # TODO: Checks if the choosed sub-graph is a proper one.
+        # TODO: Check if the choosed sub-graph is a proper one.
 
         graph_nodes = g.nodes()
 
@@ -2382,11 +2410,11 @@ class GraphRel(object):
         """
         This method performs a degree 2 reduction. See 'A Linear-Time Algorithm For Computing K-Terminal
         Reliability In Series-Parallel Networks, A. Satyanarayana and R. Kevin Wood
-        :param g: Networkx Graph to be reduced
-        :param src_node: Set the source node which the algorithm will start with.
-        :param omega: (Only for recursion) Weight of the contracted edge
-        :param prohibited_nodes: (Only for recursion) Set of nodes that won't be reduced
-        :return: Reducted Graph
+        :param g: networkx Graph to be reduced
+        :param src_node: set the source node which the algorithm will start with.
+        :param omega: (Only for recursion) weight of the contracted edge
+        :param prohibited_nodes: (Only for recursion) set of nodes that won't be reduced
+        :return: reducted Graph
         """
 
         if prohibited_nodes is None:
@@ -2447,6 +2475,7 @@ class GraphRel(object):
     def series_parallel_alg(g):
         # TODO: Not finished algorithm
         """
+        Method not finished!!!
         This method performs a series parallel reduction. See 'A Linear-Time Algorithm For Computing K-Terminal
         Reliability In Series-Parallel Networks, A. Satyanarayana and R. Kevin Wood
         :param g: Networkx Graph to be reduced
@@ -2512,8 +2541,8 @@ class GraphRel(object):
     def fair_cake_algorithm(n_nodes, chords):
         """
         Algorithm that constructs a Fair Cake Graph (FCG) with the given nodes and chords.
-        :param n_nodes: Number of nodes
-        :param chords: Number of chords
+        :param n_nodes: number of nodes
+        :param chords: number of chords
         :return: FCG
         """
 
