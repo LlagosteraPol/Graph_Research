@@ -161,10 +161,9 @@ class Switcher(object):
         path = os.getcwd() + "/data"
 
         if not analyze:
-            if os.path.isfile(path + "/plain_results/" + str(n_nodes) + "n_FairCake" + "_results.txt"):
-                os.remove(path + "/plain_results/" + str(n_nodes) + "n_FairCake" + "_results.txt")
-            print("Graph; Hamiltonian cycle; Graph Edges",
-                  file=open(path + "/plain_results/" + str(n_nodes) + "n_FairCake" + "_results.txt", "a"))
+            if os.path.isfile(path + "/graph6/" + str(n_nodes) + "n_FairCake.g6"):
+                os.remove(path + "/graph6/" + str(n_nodes) + "n_FairCake.g6")
+
         g_list = list()
         for i in range(1, int(n_nodes / 2) + 1):
             print("Constructing Fair Cake: " + str(n_nodes) + "n, " + str(i + n_nodes) + "e")
@@ -172,10 +171,12 @@ class Switcher(object):
             g_list.append(fc)
 
             if not analyze:
-                print("\n" + "Graph_n" + str(len(fc.nodes)) + "_e" + str(len(fc.edges)) + ";" +
-                      str(GraphTools.hamilton_cycle(fc)) + ";" +
-                      str(sorted(fc.edges())),
-                      file=open(path + "/plain_results/" + str(n_nodes) + "n_FairCake" + "_results.txt", "a"))
+                nx.write_graph6(fc, path + "/graph6/" + str(n_nodes) + "n_FairCake_tmp.g6", header=False)
+
+                with open(path + "/graph6/" + str(n_nodes) + "n_FairCake.g6", 'a') as outfile:
+                    with open(path + "/graph6/" + str(n_nodes) + "n_FairCake_tmp.g6") as infile:
+                        outfile.write(infile.read())
+                os.remove(path + "/graph6/" + str(n_nodes) + "n_FairCake_tmp.g6")
 
         if analyze:
             GraphTools.analyze_graphs(g_list, path, str(n_nodes) + "n_FairCake", False)
