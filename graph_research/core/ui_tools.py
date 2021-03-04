@@ -181,6 +181,9 @@ class Switcher(object):
         if analyze:
             GraphTools.analyze_graphs(g_list, path, str(n_nodes) + "n_FairCake", False)
 
+        else:
+            print("Graphs stored in g6 format into the file " + path + "/graph6/" + str(n_nodes) + "n_FairCake.g6")
+
     def option_analyze_a_g6_file(self):
         print("This option will analyze graphs inside a .g6 file.")
 

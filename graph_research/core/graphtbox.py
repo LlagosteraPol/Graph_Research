@@ -1,9 +1,11 @@
 from collections import defaultdict
+from itertools import cycle
 from math import modf
 from networkx.algorithms import isomorphism
 from random import *
 from sympy import roots
 
+import collections
 import copy
 import hashlib
 import matplotlib.pyplot as plt
@@ -2747,3 +2749,239 @@ class GraphRel(object):
                 nk -= 1
 
         return c_path
+
+
+class CakeRel(object):
+
+    @staticmethod
+    def remove_chord(c_paths, exclude):
+        """
+            Remove a chord from a 'fair cake' graph type and redo the c-pahts.
+            :param c_paths: OrderedDict of input graph c_paths with the form of <int, int> -> <id, length>
+            :param exclude: id of the chord to remove
+            :return: OrderedDict containing the c_paths of the new subgraph
+        """
+        tc = round(len(c_paths) / 2)  # Total chords
+        marked_c_paths = list()
+        chord_id = 1
+        # Mark the c_paths with the position of the chords in a list
+        for element in c_paths.keys():
+            marked_c_paths.append('x' + str(element))
+            marked_c_paths.append(chord_id)
+            chord_id = (chord_id % tc) + 1
+
+        chords = list(range(1, tc + 1))  # Id's of the chords
+
+        module = (len(chords) - len(exclude)) * 2  # Set the module to calculate the new c_paths id's
+
+        # Remove the specified chord
+        tmp = copy.deepcopy(marked_c_paths)
+        for element in exclude:
+            try:
+                while True:
+                    tmp.remove(element)
+            except ValueError:
+                pass
+
+        tmp = cycle(tmp)
+        new_c_paths = collections.OrderedDict()
+        idx = 0
+
+        # Relate the new c_path id's with the old ones (after removing a chord, some will be
+        # related with more than one old id's. Ex. x1:(x1, x2)
+        for it in range(0, module + 1):
+            idx = (idx % module) + 1
+
+            element = next(tmp)
+            while element not in chords:
+                if idx in new_c_paths and element not in new_c_paths[idx]:
+                    new_c_paths[idx].append(element)
+                elif idx not in new_c_paths:
+                    new_c_paths[idx] = [element]
+                element = next(tmp)
+
+        # Create a new OrderedDict with the new id's and its length
+        # If the new id is related with more than one old ones, will sum the lengths
+        result = collections.OrderedDict()
+        for key in new_c_paths:
+            tmp_sum = 0
+            for element in new_c_paths[key]:
+                element_id = int(element[1:len(element)])
+                tmp_sum += c_paths[element_id]
+            result[key] = tmp_sum
+
+        return collections.OrderedDict(sorted(result.items()))
+
+    @classmethod
+    def __arch_cuts(cls, alpha, c, m, c_paths):
+        """
+            Calculate the set of edge-cuts can be done using only the arches of the 'fair cake' graph.
+            The arches are the edges that are not chords.
+            :param alpha: Number of cuts that can be done
+            :param c: Number of chords of the graph
+            :param m: Number of edges of the graph
+            :param c_paths: OrderedDict of input graph c_paths with the form of <int, int> -> <id, length>
+            :return: Number of edge-cuts using the arches
+        """
+        result = 0
+
+        for j in range(2, alpha + 1):
+            for i in range(1, len(c_paths.keys()) + 1):
+                if j <= c_paths[list(c_paths)[i - 1]]:
+                    curr_path_comb = Utilities.number_combination(c_paths[list(c_paths)[i - 1]], j)
+                else:
+                    continue
+
+                # If the cut isn't minimum
+                if alpha - j > 0:
+                    for z in range(0, (alpha - j) + 1):
+                        try:
+                            next_paths_comb = Utilities.number_combination(((m - c) - sum(list(c_paths.values())[0:i])),
+                                                                 (alpha - j - z))
+                        except ValueError:
+                            next_paths_comb = 0
+
+                        if z > len(list(c_paths.keys())[0:i - 1]):
+                            sum_prev_paths = 0
+                        else:
+                            prev_paths_comb = list(itt.combinations(list(c_paths.keys())[0:i - 1], z))
+
+                            sum_prev_paths = 0
+                            for comb in prev_paths_comb:
+                                mult1 = 1
+                                for element in comb:
+                                    mult1 *= c_paths[element]
+                                sum_prev_paths += mult1
+
+                        result += curr_path_comb * next_paths_comb * sum_prev_paths
+
+                # If the cut is minimum
+                else:
+                    result += curr_path_comb
+
+        # print("Arch cut-set.: ", result)
+        return result
+
+    @classmethod
+    def __chord_cuts(cls, alpha, c, c_paths):
+        """
+            Calculate the set of edge-cuts can be done using the chords of the 'fair cake' graph.
+            The chords are the diametral edges that cross the graph (the 'cuts' of the cake).
+            :param alpha: Number of cuts that can be done
+            :param c: Number of chords of the graph
+            :param c_paths: OrderedDict of input graph c_paths with the form of <int, int> -> <id, length>
+            :return: Number of edge-cuts using the chords
+        """
+        result = 0
+
+        chord_combs = set()
+        # Get all the c-paths related to the minimum cuts using the chords
+        for z in range(1, c):
+            for i in range(0, c):
+                curr_comb = [list(c_paths.keys())[i % len(c_paths)], list(c_paths.keys())[(i + z) % len(c_paths)],
+                             list(c_paths.keys())[(i + c) % len(c_paths)],
+                             list(c_paths.keys())[(i + c + z) % len(c_paths)]]
+                curr_comb = tuple(sorted(curr_comb))
+                chord_combs.add(curr_comb)
+
+        total_set = set()
+
+        # If the cut isn't minimum
+        if (alpha - 4) > 0:
+            for ch_comb in chord_combs:
+                rest_combs = list(itt.combinations(list(set(c_paths.keys()) - set(ch_comb)), alpha - 4))
+                for rs_comb in rest_combs:
+                    total_set.add(tuple(sorted(ch_comb + rs_comb)))
+
+        # If the cut is minimum
+        else:
+            total_set = chord_combs
+
+        # Calculate the number of cut-sets
+        sum1 = 0
+        for paths in total_set:
+            mult1 = 1
+            for path in paths:
+                mult1 *= c_paths[path]
+            sum1 += mult1
+        result += sum1
+
+        # print("Chord cut-set.: ", result)
+        return result
+
+    @staticmethod
+    def cake_rel_coeff(alpha, c_paths):
+        """
+            Calculate a reliability coefficient of a 'fair cake' graph type
+            :param alpha: Number of cuts that can be done
+            :param c_paths: OrderedDict of input graph c_paths with the form of <int, int> -> <id, length>
+            :return: Coefficient
+        """
+        result = 0
+        tc = round(len(c_paths) / 2)
+        tm = tc
+        # Calculate the cut-sets of the sub-graph generated by removing chords
+        for k in range(0, (alpha - 2) + 1):
+            tmp_alpha = copy.deepcopy(alpha) - k
+            tm = tc + sum(c_paths.values())
+
+            # Remove the chords from the graph and re-combine the c_paths
+            if k > 0:
+                chord_combs = list(itt.combinations(range(1, tc + 1), k))  # Combinations of deleted chords
+                for chord_comb in chord_combs:
+                    ra = 0
+                    rb = 0
+
+                    new_c_paths = CakeRel.__remove_chord(c_paths, chord_comb)  # Remove the chord combination
+
+                    c = tc - k
+                    m = c + sum(new_c_paths.values())
+
+                    if tmp_alpha >= 2:
+                        ra = CakeRel.__arch_cuts(tmp_alpha, c, m, new_c_paths)
+
+                    if tmp_alpha >= 4:
+                        rb = CakeRel.__chord_cuts(tmp_alpha, c, new_c_paths)
+
+                    result += ra + rb
+            else:
+                ra = 0
+                rb = 0
+                # Calculate the reliability without the chords
+                if tmp_alpha >= 2:
+                    ra = CakeRel.__arch_cuts(tmp_alpha, tc, tm, c_paths)
+
+                if tmp_alpha >= 4:
+                    rb = CakeRel.__chord_cuts(tmp_alpha, tc, c_paths)
+
+                result += ra + rb
+
+        # From all edge combinations, remove the ones that disconnect the graph
+        return Utilities.number_combination(tm, alpha) - result
+
+    @staticmethod
+    def get_fc_cpaths(fc_g):
+        n = fc_g.number_of_nodes()
+        m = fc_g.number_of_edges()
+        c = m - n
+        n_paths = m - c
+        len_paths = n_paths / (2 * c)
+
+        c_paths = [int(len_paths)] * (n_paths - 1)
+        if len_paths - int(len_paths) > 0:
+            c_paths.append(int(len_paths) - 1)
+
+        return c_paths
+
+    @staticmethod
+    def cake_rel(c_paths):
+        coeffs = list()
+        tau = round(len(c_paths) / 2) + 1
+        for i in range(2, tau + 1):
+            coeffs.append(CakeRel.cake_rel_coeff(i, c_paths))
+
+        return coeffs
+
+
+
+
