@@ -2932,7 +2932,7 @@ class CakeRel(object):
                     ra = 0
                     rb = 0
 
-                    new_c_paths = CakeRel.__remove_chord(c_paths, chord_comb)  # Remove the chord combination
+                    new_c_paths = CakeRel.remove_chord(c_paths, chord_comb)  # Remove the chord combination
 
                     c = tc - k
                     m = c + sum(new_c_paths.values())
@@ -2964,14 +2964,22 @@ class CakeRel(object):
         n = fc_g.number_of_nodes()
         m = fc_g.number_of_edges()
         c = m - n
-        n_paths = m - c
-        len_paths = n_paths / (2 * c)
+        n_paths = 2 * c
+        len_paths = (m - c) / (2 * c)
 
-        c_paths = [int(len_paths)] * (n_paths - 1)
+        c_paths_lst = [int(len_paths)] * (n_paths - 1)
         if len_paths - int(len_paths) > 0:
-            c_paths.append(int(len_paths) - 1)
+            c_paths_lst.append(int(len_paths) - 1)
+        else:
+            c_paths_lst.append(int(len_paths))
 
-        return c_paths
+        c_paths_dict = collections.OrderedDict()
+        i = 1
+        for element in c_paths_lst:
+            c_paths_dict[i] = element
+            i += 1
+
+        return c_paths_dict
 
     @staticmethod
     def cake_rel(c_paths):
