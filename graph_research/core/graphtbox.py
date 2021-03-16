@@ -2917,6 +2917,12 @@ class CakeRel(object):
             :param c_paths: OrderedDict of input graph c_paths with the form of <int, int> -> <id, length>
             :return: Coefficient
         """
+        if alpha == 0:
+            return 1
+
+        if alpha == 1:
+            return round(len(c_paths) / 2) + sum(c_paths.values())
+
         result = 0
         tc = round(len(c_paths) / 2)
         tm = tc
@@ -2961,6 +2967,7 @@ class CakeRel(object):
 
     @staticmethod
     def get_fc_cpaths(fc_g):
+        """
         n = fc_g.number_of_nodes()
         m = fc_g.number_of_edges()
         c = m - n
@@ -2973,11 +2980,41 @@ class CakeRel(object):
         else:
             c_paths_lst.append(int(len_paths))
 
-        c_paths_dict = collections.OrderedDict()
+        c_paths_dict_test = collections.OrderedDict()
         i = 1
         for element in c_paths_lst:
-            c_paths_dict[i] = element
+            c_paths_dict_test[i] = element
             i += 1
+        """
+
+        ham_cycle = GraphTools.hamilton_cycle(fc_g)
+        c_paths_dict = collections.OrderedDict()
+
+        i = 1
+        tmp_cycle = copy.deepcopy(ham_cycle)
+        for node in ham_cycle:
+            if fc_g.degree[node] == 2:
+                tmp_cycle = tmp_cycle[1:] + tmp_cycle[:1]
+            else:
+                break
+
+        ham_cycle = tmp_cycle
+
+        for node in ham_cycle:
+            if not c_paths_dict:
+                c_paths_dict[i] = 0
+            else:
+                if i not in c_paths_dict:
+                    c_paths_dict[i] = 1
+                else:
+                    c_paths_dict[i] = c_paths_dict[i] + 1
+                if fc_g.degree[node] > 2:
+                    i += 1
+
+        if i not in c_paths_dict:
+            c_paths_dict[i] = 1
+        else:
+            c_paths_dict[i] = c_paths_dict[i] + 1
 
         return c_paths_dict
 
@@ -2985,7 +3022,7 @@ class CakeRel(object):
     def cake_rel(c_paths):
         coeffs = list()
         tau = round(len(c_paths) / 2) + 1
-        for i in range(2, tau + 1):
+        for i in range(0, tau + 1):
             coeffs.append(CakeRel.cake_rel_coeff(i, c_paths))
 
         return coeffs
