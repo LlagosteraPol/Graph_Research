@@ -440,7 +440,7 @@
 	}
 
 	input[type="checkbox"],
-	input[type="radio"], {
+	input[type="radio"] {
 		@include vendor('appearance', 'none');
 		display: block;
 		float: left;
@@ -1200,7 +1200,7 @@
 			}
 
 			input[type="checkbox"],
-			input[type="radio"], {
+			input[type="radio"] {
 				& + label {
 					color: _palette($p, fg);
 
@@ -1360,6 +1360,10 @@
 
 		&.style5 {
 			@include wrapper(accent7);
+		}
+
+		&.style6 {
+			background-color: #ef8d32;
 		}
 
 		@include breakpoint('<=medium') {

@@ -27,6 +27,21 @@ export default function Nav({ onMenuToggle = () => {} }) {
               <li>
                 <Link to="/Elements">Elements</Link>
               </li>
+              <li>
+                <Link to="#volunteering">Voluntariado</Link>
+              </li>
+              <li>
+                <Link to="#projects">Proyectos</Link>
+              </li>
+              <li>
+                <Link to="#associations">Asociaciones</Link>
+              </li>
+              <li>
+                <Link to="#three">La plataforma</Link>
+              </li>
+              <li>
+                <Link to="#cta">Contactar</Link>
+              </li>
             </ul>
             <a
               className="close"
