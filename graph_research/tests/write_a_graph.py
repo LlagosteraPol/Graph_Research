@@ -817,6 +817,7 @@ print(roots)
 
 """
 
+"""
 n24e27 = nx.Graph(
     [(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 9),
      (9, 10), (10, 11), (11, 12), (12, 13), (13, 14), (14, 15), (15, 16), (16, 17), (17, 18), (18, 19), (19, 20),
@@ -828,8 +829,19 @@ pol = Utilities.polynomial2binomial(GraphRel.relpoly_binary_improved(n24e27))
 time_elapsed = (time.process_time() - time_start)
 print("Reliability improved: ", time_elapsed)
 print(pol)
+"""
+
+# Graphs with n=6 and e=8
+
+n8_e12_lst = list()
+n8_e12_lst.append(nx.Graph([(0, 3), (0, 4), (0, 5), (1, 4), (1, 5), (1, 6), (2, 5), (2, 6), (2, 7), (3, 6), (3, 7), (4, 7)]) )
+n8_e12_lst.append(nx.Graph([(0, 4), (0, 5), (0, 6), (1, 4), (1, 6), (1, 7), (2, 5), (2, 6), (2, 7), (3, 5), (3, 7), (4, 7)]) )
+n8_e12_lst.append(nx.Graph([(0, 4), (0, 5), (0, 7), (1, 4), (1, 6), (1, 7), (2, 5), (2, 6), (2, 7), (3, 5), (3, 6), (3, 7)]) ) # Not Hamilton
 
 
+for g in n8_e12_lst:
+    pol = Utilities.polynomial2binomial(GraphRel.relpoly_binary_improved(g))
+    print("Reliability improved: ", pol)
 
 
 
