@@ -1610,7 +1610,13 @@ class GraphTools(object):
 
             else:
                 # Differentiate the mixed cycles into ordered or 'others
-                disconnected_subgraphs = list(nx.connected_component_subgraphs(bi_component))
+                #disconnected_subgraphs = list(nx.connected_component_subgraphs(bi_component)) # Deprecated
+
+                # Fix for networkx version >= 2.5
+                tmp_disconnected_subgraphs = list(bi_component.subgraph(c) for c in nx.connected_components(bi_component))
+                disconnected_subgraphs = list()
+                for sub_g in tmp_disconnected_subgraphs:
+                    disconnected_subgraphs.append(nx.MultiGraph(sub_g.edges()))
 
                 if filter_ordered_cycles:
                     tmp_ordered_cycles, tmp_other_graphs = GraphTools.differentiate_ordered_cycles(
@@ -1627,6 +1633,8 @@ class GraphTools(object):
                     other_graphs += tmp_other_graphs
 
             g_copy.remove_edges_from(list(bi_component.edges()))  # Delete bicomponents from the main graph
+
+        t_iso = list(nx.isolates(g_copy)) # TODO: testing
 
         # Remove isolated nodes
         g_copy.remove_nodes_from(list(nx.isolates(g_copy)))
