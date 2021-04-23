@@ -1,3 +1,5 @@
+__author__ = 'Pol Llagostera Blasco'
+
 from enum import Enum
 
 

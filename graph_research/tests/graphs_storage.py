@@ -2,6 +2,9 @@ import networkx as nx
 
 
 class GraphsStorage(object):
+    """
+    Bunch of methods to generate different types of networkx graphs
+    """
 
     @staticmethod
     def print_options():

@@ -1,3 +1,5 @@
+__author__ = 'Pol Llagostera Blasco'
+
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy as db
 import pandas as pd

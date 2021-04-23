@@ -1,6 +1,9 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
+"""
+Test file: testing subgraphs
+"""
 
 g1 = nx.Graph([(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 0), (1, 4)])
 g1_2 = nx.Graph([(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 0), (1, 4), (0, 4)])

@@ -1,6 +1,11 @@
+
+# Project classes
 from graph_research.core.graphtbox import *
-import time
-import os
+from graph_research.tests.benchmarks import *
+
+"""
+Bunch of methods to make testings
+"""
 
 class TestMethod(Enum):
     RP_Basic = 1  # Reliability Polynomial Basic

@@ -1,5 +1,7 @@
+__author__ = 'Pol Llagostera Blasco'
+
 # Project classes
-from graph_research.core.graphtbox import *
+from graphToolbox.core.graphtbox import *
 
 
 def create_data_dirs():

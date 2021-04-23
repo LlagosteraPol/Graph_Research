@@ -1,5 +1,10 @@
 from graph_research.core.graphtbox import *
 
+"""
+Purely a testing file to generate manually graphs
+"""
+
+
 def a_rel(x1, x2, x3, x4, x5, x6):
     p = sympy.symbols('p')
 
@@ -583,14 +588,14 @@ polynomial = GraphRel.relpoly_binary_improved(g, 0)
 
 print(polynomial)
 """
-
+"""
 engine = db.create_engine('sqlite:///' + os.getcwd() + "/Data/DDBB/Graphs_DB.db", echo=False)
 Session = db.orm.session.sessionmaker(bind=engine)
 session = Session()
 session._model_changes = {}
 metadata = db.MetaData()
 graphs = db.Table('Graphs', metadata, autoload=True, autoload_with=engine)
-
+"""
 #df = DButilities.read_table(session, TableGraph, conditions="nodes <= 8")
 
 """
@@ -768,7 +773,7 @@ for key, values in df.iterrows():
     #print("Type ", i, " Rel = ", rel)
     #i +=1
 """
-
+"""
 g_types = GraphTools.gen_ham_3ch_types([2,2,7,2,2,7])
 
 #GraphTools.plot(g_types[2])
@@ -780,6 +785,7 @@ print("A")
 print("Generated", a_pol)
 #print("Computed: ", Utilities.polynomial2binomial(a_poly))
 #print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[0])))
+"""
 """
 
 g_types = GraphTools.gen_ham_3ch_types([2,2,2,2,2,2])
@@ -797,6 +803,7 @@ print("Generated", c_pol)
 print("Computed: ", Utilities.polynomial2binomial(c_poly))
 print("2nd checking: ", Utilities.polynomial2binomial(GraphRel.relpoly_binary_basic(g_types[2])))
 """
+"""
 d2, d3, dt, d_pol = d_rel(3,1,1,2,1,1)
 #d_poly = GraphRel.relpoly_binary_improved(g_types[3])
 print("D")
@@ -808,11 +815,33 @@ print("Generated", d_pol)
 roots = roots(sympy.Poly(a_pol) - sympy.Poly(d_pol))
 print(roots)
 
+"""
+
+"""
+n24e27 = nx.Graph(
+    [(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 9),
+     (9, 10), (10, 11), (11, 12), (12, 13), (13, 14), (14, 15), (15, 16), (16, 17), (17, 18), (18, 19), (19, 20),
+     (20, 21), (21, 22), (22, 23), (23, 0), (0, 7), (4, 15), (5, 18)]
+)
+
+time_start = time.process_time()
+pol = Utilities.polynomial2binomial(GraphRel.relpoly_binary_improved(n24e27))
+time_elapsed = (time.process_time() - time_start)
+print("Reliability improved: ", time_elapsed)
+print(pol)
+"""
+
+# Graphs with n=8 and e=15
+
+n8_e12_lst = list()
+n8_e12_lst.append(nx.Graph([(0, 4), (0, 5), (0, 6), (0, 7), (1, 4), (1, 5), (1, 6), (1, 7), (2, 4), (2, 5), (2, 6), (2, 7), (3, 5), (3, 6), (3, 7)]) ) # Hamiltonian
+n8_e12_lst.append(nx.Graph([(0, 3), (0, 4), (0, 6), (0, 7), (1, 4), (1, 5), (1, 6), (1, 7), (2, 4), (2, 5), (2, 6), (3, 5), (3, 6), (3, 7), (4, 7)]) ) # Hamiltonian
+n8_e12_lst.append(nx.Graph([(0, 3), (0, 4), (0, 5), (0, 7), (1, 3), (1, 5), (1, 6), (2, 4), (2, 5), (2, 6), (2, 7), (3, 6), (3, 7), (4, 6), (5, 7)]) ) # Hamiltonian
 
 
-
-
-
+for g in n8_e12_lst:
+    pol = Utilities.polynomial2binomial(GraphRel.relpoly_binary_improved(g))
+    print("Reliability improved: ", pol)
 
 
 

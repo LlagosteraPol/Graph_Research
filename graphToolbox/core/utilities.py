@@ -1,3 +1,5 @@
+__author__ = 'Pol Llagostera Blasco'
+
 from collections import Counter
 from collections import OrderedDict
 from math import factorial

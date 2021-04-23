@@ -1,3 +1,5 @@
+__author__ = 'Pol Llagostera Blasco'
+
 from collections import defaultdict
 from itertools import cycle
 from math import modf
@@ -16,7 +18,7 @@ import time
 
 # Project classes
 from .enums import *
-from graph_research.core.db_tools import *
+from graphToolbox.core.db_tools import *
 from .utilities import *
 
 
