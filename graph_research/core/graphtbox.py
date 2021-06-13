@@ -1984,7 +1984,7 @@ class GraphRel(object):
         return polynomial
 
     @staticmethod
-    def relpoly_treecyc(g, cycle_edges):
+    def relpoly_treecyc_deprecated(g, cycle_edges):
         """
         Get the Reliability Polynomial of a tree+cycles graph shape (no multiedge).
         :param g: networkx graph.
@@ -2027,6 +2027,44 @@ class GraphRel(object):
                   "\n Basic Rel:\n",
                   s_ref, "= ", s_ref.subs({p: 0.6}), "\n\n\n", file=open("deb_output.txt", "a"))
         """
+
+        return sympy.Poly(polynomial)
+
+    @staticmethod
+    def relpoly_treecyc(g, cycle_edges, debug=False):
+        """
+        Get the Reliability Polynomial of a tree+cycles graph shape (no multiedge).
+        :param g: networkx graph.
+        :param cycle_edges: <list> (list), list of the edges of each cycle of the graph.
+        :return: reliability polynomial
+        """
+        p = sympy.symbols('p')
+
+        cycles = cycle_edges
+        n_edges = len(g.edges)
+        polynomial = 0
+
+        # Broken edges >1
+        for i in range(0, len(cycles) + 1):
+            result = 0
+
+            for subset in itt.combinations(cycle_edges, i):
+                oper = 1
+                for cycle in subset:
+                    oper *= len(cycle)
+                result += oper
+            polynomial += result * p ** n_edges * (1 - p) ** i
+            n_edges -= 1
+
+
+        # For debug purposes
+        if debug:
+            s_ref = GraphRel.relpoly_binary_basic(g)
+
+            if sympy.Poly(polynomial) != s_ref:
+                print("Error in graph: ", g.edges, "\n\n Improved Rel treecyc:\n", polynomial, polynomial.subs({p: 0.6}),
+                      "\n Basic Rel:\n",
+                      s_ref, "= ", s_ref.subs({p: 0.6}), "\n\n\n", file=open("deb_output.txt", "a"))
 
         return sympy.Poly(polynomial)
 
@@ -2971,26 +3009,6 @@ class CakeRel(object):
 
     @staticmethod
     def get_fc_cpaths(fc_g):
-        """
-        n = fc_g.number_of_nodes()
-        m = fc_g.number_of_edges()
-        c = m - n
-        n_paths = 2 * c
-        len_paths = (m - c) / (2 * c)
-
-        c_paths_lst = [int(len_paths)] * (n_paths - 1)
-        if len_paths - int(len_paths) > 0:
-            c_paths_lst.append(int(len_paths) - 1)
-        else:
-            c_paths_lst.append(int(len_paths))
-
-        c_paths_dict_test = collections.OrderedDict()
-        i = 1
-        for element in c_paths_lst:
-            c_paths_dict_test[i] = element
-            i += 1
-        """
-
         ham_cycle = GraphTools.hamilton_cycle(fc_g)
         c_paths_dict = collections.OrderedDict()
 
