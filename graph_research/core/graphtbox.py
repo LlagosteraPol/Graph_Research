@@ -1956,7 +1956,7 @@ class GraphRel(object):
                         mcy_bal_pedges, mcy_tree_edges, mcy_cycle_edges, mcy_total_edges = GraphTools.get_detailed_graph_edges(
                             pure_cycle)
                         polynomial *= GraphRel.relpoly_multicycle(mcy_bal_pedges,
-                                                                  mcy_cycle_edges[0])  # TODO: mcy_cycle_edges[0] ?
+                                                                  mcy_cycle_edges[0])  # [0] to select the first (and only) cycle
 
                 elif g_type[0] == GraphType.OrderedCycles and g_type[1] != list():
                     for ordered_cycles in g_type[1]:
