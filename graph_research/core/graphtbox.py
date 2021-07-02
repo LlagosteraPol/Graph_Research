@@ -3018,14 +3018,19 @@ class CakeRel(object):
         return Utilities.number_combination(tm, alpha) - result
 
     @staticmethod
-    def get_fc_cpaths(fc_g):
-        ham_cycle = GraphTools.hamilton_cycle(fc_g)
+    def get_cg_cpaths(cg):
+        """
+        Gives a dictionary with the number of edges of each c-path (paths between nodes of degree 3)
+        :param cg: Cake type graph (networkx 'graph' object type)
+        :return: Dictionary with key: ID of the c-path, Value: Number of edges
+        """
+        ham_cycle = GraphTools.hamilton_cycle(cg)
         c_paths_dict = collections.OrderedDict()
 
         i = 1
         tmp_cycle = copy.deepcopy(ham_cycle)
         for node in ham_cycle:
-            if fc_g.degree[node] == 2:
+            if cg.degree[node] == 2:
                 tmp_cycle = tmp_cycle[1:] + tmp_cycle[:1]
             else:
                 break
@@ -3040,7 +3045,7 @@ class CakeRel(object):
                     c_paths_dict[i] = 1
                 else:
                     c_paths_dict[i] = c_paths_dict[i] + 1
-                if fc_g.degree[node] > 2:
+                if cg.degree[node] > 2:
                     i += 1
 
         if i not in c_paths_dict:
@@ -3051,7 +3056,13 @@ class CakeRel(object):
         return c_paths_dict
 
     @staticmethod
-    def cake_rel(c_paths):
+    def cake_rel(cg):
+        """
+        Calculates the reliability polynomial coefficients of a 'Cake' graph.
+        :param cg: Cake type graph (networkx 'graph' object type)
+        :return: Reliability Polynomial coefficients of the given 'Cake' graph
+        """
+        c_paths = CakeRel.get_cg_cpaths(cg)
         coeffs = list()
         tau = round(len(c_paths) / 2) + 1
         for i in range(0, tau + 1):

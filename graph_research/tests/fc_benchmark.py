@@ -18,8 +18,8 @@ for n in range(min_n_nodes, max_n_nodes + 1):
         poly = GraphRel.relpoly_binary_improved(g, 0)
         bin_poly, bin_coefficients = Utilities.polynomial2binomial(poly)
         coeffs_old[(n, g.number_of_edges())] = list(map(int, bin_coefficients))
-        test = CakeRel.get_fc_cpaths(g)
-        coeffs_new[(n, g.number_of_edges())] = CakeRel.cake_rel(CakeRel.get_fc_cpaths(g))
+        test = CakeRel.get_cg_cpaths(g)
+        coeffs_new[(n, g.number_of_edges())] = CakeRel.cake_rel(g)
 
 
 for key in coeffs_old.keys():
