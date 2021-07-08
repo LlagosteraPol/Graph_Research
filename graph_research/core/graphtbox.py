@@ -2869,7 +2869,7 @@ class CakeRel(object):
         """
             Calculate the set of edge-cuts can be done using only the arches of the 'fair cake' graph.
             The arches are the edges that are not chords.
-            :param alpha: Number of cuts that can be done
+            :param alpha: Number of maximum cuts that can be done without disconnecting the graph
             :param c: Number of chords of the graph
             :param m: Number of edges of the graph
             :param c_paths: OrderedDict of input graph c_paths with the form of <int, int> -> <id, length>
@@ -2919,7 +2919,7 @@ class CakeRel(object):
         """
             Calculate the set of edge-cuts can be done using the chords of the 'fair cake' graph.
             The chords are the diametral edges that cross the graph (the 'cuts' of the cake).
-            :param alpha: Number of cuts that can be done
+            :param alpha: Number of maximum cuts that can be done without disconnecting the graph
             :param c: Number of chords of the graph
             :param c_paths: OrderedDict of input graph c_paths with the form of <int, int> -> <id, length>
             :return: Number of edge-cuts using the chords
