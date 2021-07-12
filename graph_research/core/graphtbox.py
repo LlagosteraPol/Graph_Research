@@ -2930,7 +2930,8 @@ class CakeRel(object):
         # Get all the c-paths related to the minimum cuts using the chords
         for z in range(1, c):
             for i in range(0, c):
-                curr_comb = [list(c_paths.keys())[i % len(c_paths)], list(c_paths.keys())[(i + z) % len(c_paths)],
+                curr_comb = [list(c_paths.keys())[i % len(c_paths)],
+                             list(c_paths.keys())[(i + z) % len(c_paths)],
                              list(c_paths.keys())[(i + c) % len(c_paths)],
                              list(c_paths.keys())[(i + c + z) % len(c_paths)]]
                 curr_comb = tuple(sorted(curr_comb))
@@ -2965,15 +2966,15 @@ class CakeRel(object):
     def cake_rel_coeff(alpha, c_paths):
         """
             Calculate a reliability coefficient of a 'fair cake' graph type
-            :param alpha: Number of cuts that can be done
+            :param alpha: Number of maximum cuts that can be done without disconnecting the graph
             :param c_paths: OrderedDict of input graph c_paths with the form of <int, int> -> <id, length>
             :return: Coefficient
         """
         if alpha == 0:
-            return 1
+            return 1  # no cuts done
 
         if alpha == 1:
-            return round(len(c_paths) / 2) + sum(c_paths.values())
+            return round(len(c_paths) / 2) + sum(c_paths.values())  # == number of edges of the graph
 
         result = 0
         tc = round(len(c_paths) / 2)
@@ -3064,7 +3065,7 @@ class CakeRel(object):
         """
         c_paths = CakeRel.get_cg_cpaths(cg)
         coeffs = list()
-        tau = round(len(c_paths) / 2) + 1
+        tau = round(len(c_paths) / 2) + 1  # Maximum number of cuts without disconnecting the graph (== n_chords + 1)
         for i in range(0, tau + 1):
             coeffs.append(CakeRel.cake_rel_coeff(i, c_paths))
 

@@ -9,7 +9,7 @@ os.chdir("..")
 path = os.getcwd() + "/data"
 
 min_n_nodes = 8
-max_n_nodes = 21
+max_n_nodes = 8
 
 for n in range(min_n_nodes, max_n_nodes + 1):
     g_list = nx.read_graph6(path + "/graph6/" + str(n) + "n_FairCake.g6")
