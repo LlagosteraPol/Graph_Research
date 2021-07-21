@@ -881,18 +881,18 @@ class GraphTools(object):
             print(decoded, file=open(os.getcwd() + "/data/graph6/" + file_name + ".g6", "w"), end='')
 
     @staticmethod
-    def gen_random_hamiltonian(n_nodes, chords, p_new_connection=0.1):
+    def gen_random_hamiltonian(n_nodes, chords):
         """
         Generate a random Hamiltonian graph with the nodes and chords provided
         :param n_nodes: number of nodes of the graph
         :param chords: number of chords of the graph
-        :param p_new_connection: probability to add new edge
         :return: a Hamiltonian graph
         """
 
         cycle = nx.cycle_graph(n_nodes)
         n_edges = len(cycle.edges)
         new_edges = list()
+        p_new_connection = 1/n_nodes # probability to add new edge
 
         #  Not enough edges to form a cycle with all the nodes
         if chords < 0:

@@ -4,16 +4,27 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from enum import Enum
 
+
 class GType(Enum):
     Hypercube = 1
     Grid = 2
     CircularLadder = 3
     Complete = 4
+    RandomHamiltonian = 5
 
-def compare_times(gtype, n_max):
+
+def compare_times(gtype, n_max, n_min=2, chords=0):
+    """
+    Compare computational times between the Deletion-Contraction algorithm, and its optimized version
+    :param gtype: <GType> graph type (enum object)
+    :param n_max: maximum number of nodes
+    :param n_min: minimum number of nodes (2 by default)
+    :param chords: number of chords (only in the case of random hamiltonian graphs), 0 by default
+    :return: dictionary with all the times where <key=nodes, value = both times (pair object)
+    """
     print("----------------------------------------------", gtype.name, "------------------------------------------------")
     times = dict()
-    for n in range(2, n_max + 1):
+    for n in range(n_min, n_max + 1):
         print("\n-----------> n =", n)
         if gtype == GType.Hypercube:
             g = nx.hypercube_graph(n)
@@ -23,6 +34,8 @@ def compare_times(gtype, n_max):
             g = nx.circular_ladder_graph(n)
         elif gtype == GType.Complete:
             g = nx.complete_graph(n)
+        elif gtype == GType.RandomHamiltonian:
+            g = GraphTools.gen_random_hamiltonian(n, chords)
 
         start1 = time.time()
         poly = GraphRel.relpoly_binary_basic(g)
@@ -59,7 +72,11 @@ def ctime_circularladder(n_max):
 def ctime_complete(n_max):
     compare_times(GType.Complete, n_max)
 
+def ctime_randomhamiltonian(n_min, n_max, chords):
+    compare_times(GType.RandomHamiltonian, n_max, n_min, chords)
+
 #ctime_hypercube(3)
 #ctime_grid(3)
 #ctime_circularladder(3)
-ctime_complete(3)
+#ctime_complete(3)
+ctime_randomhamiltonian(5, 12, 3)
