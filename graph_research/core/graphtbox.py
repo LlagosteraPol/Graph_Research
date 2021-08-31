@@ -894,14 +894,10 @@ class GraphTools(object):
         new_edges = list()
         p_new_connection = 1/n_nodes # probability to add new edge
 
-        #  Not enough edges to form a cycle with all the nodes
-        if chords < 0:
-            raise ValueError("The number of edges must be at least equal to the number of nodes\n")
-
         #  More edges than the complete graph
-        elif n_edges > (n_nodes * (n_nodes - 1)) / 2:
+        if (n_edges + chords) > (n_nodes * (n_nodes - 1)) / 2:
             raise ValueError("The number of edges exceed the complete graph "
-                             "with the given nodes (too much edges)")
+                             "with the given number of chords")
 
         # Just enough edges to form a cycle with all the nodes
         elif chords == 0:
