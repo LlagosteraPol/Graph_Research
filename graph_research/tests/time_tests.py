@@ -79,4 +79,8 @@ def ctime_randomhamiltonian(n_min, n_max, chords):
 #ctime_grid(3)
 #ctime_circularladder(3)
 #ctime_complete(3)
-ctime_randomhamiltonian(5, 12, 3)
+#ctime_randomhamiltonian(5, 12, 3)
+
+ctime_randomhamiltonian(12, 24, 6)
+
+
