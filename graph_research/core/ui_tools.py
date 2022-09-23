@@ -160,10 +160,6 @@ class Switcher(object):
 
         path = os.getcwd() + "/data"
 
-        if not analyze:
-            if os.path.isfile(path + "/graph6/" + str(n_nodes) + "n_FairCake.g6"):
-                os.remove(path + "/graph6/" + str(n_nodes) + "n_FairCake.g6")
-
         g_list = list()
         for i in range(1, int(n_nodes / 2) + 1):
             print("Constructing Fair Cake: " + str(n_nodes) + "n, " + str(i + n_nodes) + "e")
@@ -171,6 +167,9 @@ class Switcher(object):
             g_list.append(fc)
 
             if not analyze:
+                if os.path.isfile(path + "/graph6/" + str(n_nodes) + "n_" + str(i) + "ch_FairCake.g6"):
+                    os.remove(path + "/graph6/" + str(n_nodes) + "n_" + str(i) + "ch_FairCake.g6")
+
                 nx.write_graph6(fc, path + "/graph6/" + str(n_nodes) + "n_" + str(i) + "ch_FairCake_tmp.g6",
                                 header=False)
 
