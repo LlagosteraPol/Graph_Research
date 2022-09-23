@@ -171,18 +171,20 @@ class Switcher(object):
             g_list.append(fc)
 
             if not analyze:
-                nx.write_graph6(fc, path + "/graph6/" + str(n_nodes) + "n_FairCake_tmp.g6", header=False)
+                nx.write_graph6(fc, path + "/graph6/" + str(n_nodes) + "n_" + str(i) + "ch_FairCake_tmp.g6",
+                                header=False)
 
-                with open(path + "/graph6/" + str(n_nodes) + "n_FairCake.g6", 'a') as outfile:
-                    with open(path + "/graph6/" + str(n_nodes) + "n_FairCake_tmp.g6") as infile:
+                with open(path + "/graph6/" + str(n_nodes) + "n_" + str(i) + "ch_FairCake.g6", 'a') as outfile:
+                    with open(path + "/graph6/" + str(n_nodes) + "n_" + str(i) + "ch_FairCake_tmp.g6") as infile:
                         outfile.write(infile.read())
-                os.remove(path + "/graph6/" + str(n_nodes) + "n_FairCake_tmp.g6")
+                os.remove(path + "/graph6/" + str(n_nodes) + "n_" + str(i) + "ch_FairCake_tmp.g6")
 
-        if analyze:
-            GraphTools.analyze_graphs(g_list, path, str(n_nodes) + "n_FairCake", False)
+            if analyze:
+                GraphTools.analyze_graphs(g_list, path, str(n_nodes) + "n_" + str(i) + "ch_FairCake", False)
 
         else:
-            print("Graphs stored in g6 format into the file " + path + "/graph6/" + str(n_nodes) + "n_FairCake.g6")
+            print("Graphs stored in g6 format into the file " + path + "/graph6/" + str(n_nodes) + "n_" + str(
+                i) + "ch_FairCake.g6")
 
     def option_analyze_a_g6_file(self):
         print("This option will analyze graphs inside a .g6 file.")
